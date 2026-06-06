@@ -1,0 +1,6 @@
+{
+  "name": "GIS Lab Group 15",
+  "description": "An interactive WebGIS and analysis platform monitoring air quality and land cover change in Turkey (2021–2023).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

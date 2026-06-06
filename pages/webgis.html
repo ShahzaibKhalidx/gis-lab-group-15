@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Lab 2026 | Group 15 - Interactive WebGIS Map</title>
+    <!-- Tailwind CSS for sleek layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- OpenLayers CSS via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.css" type="text/css">
+    <!-- OpenLayers JS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+    <!-- Lucide Icons for clean buttons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #0b0f19;
+        }
+        /* OpenLayers custom overrides styling */
+        .ol-control button {
+            background-color: rgba(15, 23, 42, 0.9) !important;
+            color: #10B981 !important;
+            border: 1px solid #1e293b !important;
+            font-weight: bold !important;
+        }
+        .ol-control button:hover {
+            background-color: #1e293b !important;
+            color: #34D399 !important;
+        }
+        .ol-scale-line {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border: 1px solid #1e293b !important;
+            border-radius: 6px !important;
+            padding: 4px 8px !important;
+            bottom: 20px !important;
+            right: 80px !important;
+            left: auto !important;
+        }
+        .ol-scale-line-inner {
+            color: #e2e8f0 !important;
+            border-color: #e2e8f0 !important;
+            font-size: 10px !important;
+            font-family: monospace !important;
+        }
+        /* Sidebar collapse animation classes */
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .collapsed-sidebar {
+            width: 0 !important;
+            overflow: hidden !important;
+            border-right-width: 0 !important;
+        }
+    </style>
+</head>
+<body class="text-white select-none">
+
+    <!-- ─── TOP HEADER BAR ─── -->
+    <header class="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 z-30 relative shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-emerald-500/10 border border-emerald-500/25 rounded text-emerald-400">
+                <i data-lucide="globe" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <span class="text-[10px] text-emerald-400 uppercase font-mono tracking-wider font-extrabold block leading-none">GIS Lab 2026</span>
+                <span class="font-bold text-slate-100 text-sm block">Interactive Turkey WebGIS (Group 15)</span>
+            </div>
+        </div>
+
+        <nav class="hidden md:flex gap-4 text-xs font-semibold select-none items-center">
+            <a href="../index.html" class="text-slate-400 hover:text-white transition-all no-underline px-3 py-2">Home</a>
+            <a href="analysis.html" class="text-slate-400 hover:text-white transition-all no-underline px-3 py-2">Analysis</a>
+            <a href="webgis.html" class="text-emerald-400 border-b-2 border-emerald-400 leading-6 no-underline px-3 py-2">WebGIS Map</a>
+            <span class="text-slate-700">|</span>
+            <a href="https://github.com/shahzaib1638/mapping-air-quality-turkey" target="_blank" class="px-3 py-1.5 border border-slate-700 hover:border-slate-500 rounded text-[10px] font-mono tracking-wider font-bold uppercase text-slate-300 no-underline flex items-center gap-1.5 hover:bg-slate-850">
+                <i data-lucide="github" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>GitHub Repos</span>
+            </a>
+        </nav>
+    </header>
+
+    <!-- ─── LAYOUT WRAPPER ─── -->
+    <div class="flex h-[calc(100vh-64px)] w-full overflow-hidden relative">
+
+        <!-- ─── COLLAPSIBLE SIDEBAR PANEL (Requirement LEFT) ─── -->
+        <div id="layer-panel" class="sidebar-transition w-80 bg-slate-900 border-r border-slate-800 flex flex-col z-20 h-full relative shrink-0">
+            <div class="flex flex-col h-full overflow-y-auto">
+                
+                <!-- Panel Header -->
+                <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="layers" class="w-5 h-5 text-emerald-400"></i>
+                        <h3 class="font-bold text-slate-100 text-sm">GIS WebGIS Panel</h3>
+                    </div>
+                    <button id="sidebar-toggle-btn" class="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white cursor-pointer transition-colors" title="Collapse Panel">
+                        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Active Pollutant Switcher -->
+                <div class="p-5 border-b border-slate-800 bg-slate-950/40">
+                    <span class="text-[10px] text-slate-550 uppercase font-mono font-bold tracking-wider block mb-3">Select Active Pollutant</span>
+                    <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-lg border border-slate-800">
+                        <button id="btn-pm10" class="pollutant-btn py-1.5 rounded font-mono text-xs font-bold bg-emerald-500 text-slate-950 shadow cursor-pointer transition-all" onclick="setPollutant('pm10')">PM10</button>
+                        <button id="btn-no2" class="pollutant-btn py-1.5 rounded font-mono text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer transition-all" onclick="setPollutant('no2')">NO₂</button>
+                        <button id="btn-pm25" class="pollutant-btn py-1.5 rounded font-mono text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer transition-all" onclick="setPollutant('pm25')">PM2.5</button>
+                    </div>
+                    <p id="pollutant-indicator-label" class="text-[10px] text-slate-450 font-mono italic text-center mt-2.5">
+                        Particulate Matter 10 (Trees mapped)
+                    </p>
+                </div>
+
+                <!-- Layers Toggles list -->
+                <div class="p-5 border-b border-slate-800 flex-grow">
+                    <span class="text-[10px] text-slate-550 uppercase font-mono font-bold tracking-wider block mb-3">Analytical Overlays (WMS)</span>
+                    <div class="space-y-2" id="layers-toggles-container">
+                        <!-- Toggles populated dynamically in JS to match active, or hardcoded for bulletproof loading -->
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-800 bg-slate-800/60 text-white cursor-pointer" onclick="toggleLayer('concentration')">
+                            <span class="text-xs font-semibold leading-tight">Concentration Map 2023</span>
+                            <button id="eye-concentration" class="p-1 text-emerald-400 bg-emerald-500/10 rounded"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('amac')">
+                            <span class="text-xs font-semibold leading-tight">AMAC Change 2021–2023</span>
+                            <button id="eye-amac" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('landCover')">
+                            <span class="text-xs font-semibold leading-tight">Land Cover Change (LCC)</span>
+                            <button id="eye-landCover" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('bivariate')">
+                            <span class="text-xs font-semibold leading-tight">Bivariate (Pop × Poll)</span>
+                            <button id="eye-bivariate" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('population')">
+                            <span class="text-xs font-semibold leading-tight">Population Quantiles</span>
+                            <button id="eye-population" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('zonalStatistics')">
+                            <span class="text-xs font-semibold leading-tight">Zonal Statistics Summary</span>
+                            <button id="eye-zonalStatistics" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('average2023')">
+                            <span class="text-xs font-semibold leading-tight">Average 2023 Grid</span>
+                            <button id="eye-average2023" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-500 hover:text-slate-300 cursor-pointer" onclick="toggleLayer('cams2023')">
+                            <span class="text-xs font-semibold leading-tight">CAMS Dec 2023</span>
+                            <button id="eye-cams2023" class="p-1 text-slate-600 hover:text-slate-400"><i data-lucide="eye-off" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opacity Slider -->
+                <div class="p-5 border-b border-slate-800 bg-slate-950/30">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] text-slate-550 uppercase font-mono font-bold tracking-wider flex items-center gap-1.5">
+                            <i data-lucide="sliders" class="w-3.5 h-3.5 text-indigo-400"></i> Overlay Opacity
+                        </span>
+                        <span id="opacity-value-label" class="font-mono text-emerald-400 text-xs font-bold bg-slate-900 px-2.5 py-0.5 rounded border border-slate-850">85%</span>
+                    </div>
+                    <input id="opacity-slider-input" type="range" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400" min="0.1" max="1.0" step="0.05" value="0.85">
+                </div>
+
+                <!-- Basemap Switcher Selector -->
+                <div class="p-5 shrink-0 bg-slate-900">
+                    <span class="text-[10px] text-slate-550 uppercase font-mono font-bold tracking-wider block mb-3">Basemaps Switcher Matrix</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <button id="base-osm" class="base-btn p-2.5 bg-indigo-600/20 border border-indigo-550 text-indigo-200 rounded-lg text-left truncate flex items-center justify-between cursor-pointer" onclick="setBasemap('osm')">
+                            <span>OSM Standard</span>
+                            <i data-lucide="check" class="w-3 h-3 text-indigo-400"></i>
+                        </button>
+                        <button id="base-esriTopo" class="base-btn p-2.5 bg-slate-950/25 border border-slate-800 text-slate-400 rounded-lg text-left truncate flex items-center justify-between cursor-pointer hover:border-slate-700" onclick="setBasemap('esriTopo')">
+                            <span>Esri Topo</span>
+                        </button>
+                        <button id="base-esriImagery" class="base-btn p-2.5 bg-slate-950/25 border border-slate-800 text-slate-400 rounded-lg text-left truncate flex items-center justify-between cursor-pointer hover:border-slate-700" onclick="setBasemap('esriImagery')">
+                            <span>Esri Imagery</span>
+                        </button>
+                        <button id="base-cartoDark" class="base-btn p-2.5 bg-slate-950/25 border border-slate-800 text-slate-400 rounded-lg text-left truncate flex items-center justify-between cursor-pointer hover:border-slate-700" onclick="setBasemap('cartoDark')">
+                            <span>CartoDB Dark</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Floating expand menu drawer when sidebar collapsed -->
+        <button id="layer-panel-expand-btn" class="sidebar-transition scale-0 absolute left-4 top-4 z-20 bg-slate-900 border border-slate-800 p-2.5 rounded-lg shadow-xl text-slate-300 hover:text-white cursor-pointer hover:scale-105 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+            <span class="text-xs font-bold uppercase tracking-wider font-mono pr-1">Layers Panel</span>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+
+        <!-- ─── CENTER/MAP DIV ─── -->
+        <div class="flex-grow h-full bg-slate-950 relative">
+            <div id="map" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+            <!-- Floating Coordinates display -->
+            <div class="absolute right-5 top-5 z-20 bg-slate-900/95 border border-slate-800 rounded-lg px-4 py-2.5 shadow-xl text-xs font-mono text-slate-200 flex items-center gap-2 select-all">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-400 animate-pulse animate-duration-1000"></i>
+                <span class="text-slate-500 font-bold">WGS84 Coordinate:</span>
+                <span id="coords-text" class="text-emerald-400 font-bold">35.2401°E , 38.9637°N</span>
+            </div>
+
+            <!-- Floating Recenter Turkey button -->
+            <button id="recenter-btn" class="absolute bottom-5 right-5 z-20 bg-slate-900/95 hover:bg-slate-850 border border-slate-800 p-3 rounded-full text-slate-350 hover:text-white shadow-xl cursor-pointer hover:scale-110 active:scale-95 transition-all" title="Recenter Turkey Extents">
+                <i data-lucide="rotate-ccw" class="w-4.5 h-4.5"></i>
+            </button>
+
+            <!-- ─── REQ: LAYERS DYNAMIC LEGEND (Requirement bottom-left) ─── -->
+            <div class="absolute left-5 bottom-5 z-20 max-w-[270px] bg-slate-900/95 border border-slate-800 rounded-xl p-4 shadow-xl select-none max-h-72 overflow-y-auto">
+                <div class="flex items-center gap-1.5 border-b border-slate-800 pb-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <h4 class="text-xs font-bold uppercase font-mono tracking-wider text-slate-300">Active Map Legend</h4>
+                </div>
+                <div id="legend-dynamic-content" class="space-y-4">
+                    <!-- Populated dynamically via javascript depending on active visibilities -->
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ─── JAVASCRIPT OPENLAYERS ENGINE ─── -->
+    <script>
+        // Init Lucide Library Icons
+        lucide.createIcons();
+
+        // ─── GEOSERVER WMS INFORMATION CONFIG ───
+        const WMS_URL = 'https://www.gis-geoserver.polimi.it/geoserver/gisgeoserver_15/wms';
+        
+        const LAYER_NAMES = {
+            no2: {
+                concentration:   'gisgeoserver_15:Turkey_no2_concentration_map_2023',
+                amac:            'gisgeoserver_15:Turkey_no2_2021_2023_AMAC_map',
+                landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+                bivariate:       'gisgeoserver_15:Turkey_no2_pol_2023_bivariate',
+                population:      'gisgeoserver_15:YOUR_NO2_POPULATION_LAYER',
+                zonalStatistics: 'gisgeoserver_15:Turkey_no2_zonal_statistics',
+                average2023:     'gisgeoserver_15:Turkey_average_no2_2023',
+                cams2023:        'gisgeoserver_15:Turkey_CAMS_no2_2023_12',
+            },
+            pm25: {
+                concentration:   'gisgeoserver_15:Turkey_pm2p5_concentration_map_2023',
+                amac:            'gisgeoserver_15:Turkey_pm2p5_2021_2023_AMAC_map',
+                landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+                bivariate:       'gisgeoserver_15:Turkey_pm2p5_pol_2023_bivariate',
+                population:      'gisgeoserver_15:YOUR_PM25_POPULATION_LAYER',
+                zonalStatistics: 'gisgeoserver_15:Turkey_pm2p5_zonal_statistics',
+                average2023:     'gisgeoserver_15:Turkey_average_pm2p5_2023',
+                cams2023:        'gisgeoserver_15:Turkey_CAMS_pm2p5_2023_12',
+            },
+            pm10: {
+                concentration:   'gisgeoserver_15:TURKEY_pm10_concentration_map_2023',
+                amac:            'gisgeoserver_15:TURKEY_pm10_2021_2023_AMAC_map',
+                landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+                bivariate:       'gisgeoserver_15:Turkey_pm10_2023_bivariate',
+                population:      'gisgeoserver_15:Turkey_pm10_2023_chart',
+                zonalStatistics: 'gisgeoserver_15:Turkey_pm10_zonal_statistics',
+                average2023:     'gisgeoserver_15:Turkey_average_pm10_2023',
+                cams2023:        'gisgeoserver_15:TURKEY_CAMS_pm10_2023_12',
+            },
+        };
+
+        const OVERLAY_META = [
+            { key: 'concentration', label: 'Concentration Map 2023' },
+            { key: 'amac', label: 'AMAC Change 2021–2023' },
+            { key: 'landCover', label: 'Land Cover Change' },
+            { key: 'bivariate', label: 'Bivariate (Pop × Poll)' },
+            { key: 'population', label: 'Population Quantiles' },
+            { key: 'zonalStatistics', label: 'Zonal Statistics' },
+            { key: 'average2023', label: 'Average 2023 Base Grid' },
+            { key: 'cams2023', label: 'CAMS Dec 2023' }
+        ];
+
+        const TURKEY_EXTENT_4326 = [25.6, 35.8, 44.9, 42.1];
+        const TURKEY_EXTENT = ol.proj.transformExtent(TURKEY_EXTENT_4326, 'EPSG:4326', 'EPSG:3857');
+
+        // State control
+        let activePollutant = 'pm10';
+        let basemapKey = 'osm';
+        let opacityValue = 0.85;
+        let visibilities = {
+            concentration: true,
+            amac: false,
+            landCover: false,
+            bivariate: false,
+            population: false,
+            zonalStatistics: false,
+            average2023: false,
+            cams2023: false
+        };
+
+        // ─── INITIALIZE BASEMAP OVERLAYS ───
+        const basemaps = {
+            osm: new ol.layer.Tile({
+                source: new ol.source.OSM(),
+                visible: true,
+            }),
+            esriTopo: new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    attributions: 'Tiles © ArcGIS',
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                }),
+                visible: false,
+            }),
+            esriImagery: new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    attributions: 'Tiles © ArcGIS',
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                }),
+                visible: false,
+            }),
+            cartoDark: new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    attributions: 'Tiles © CartoDB',
+                    url: 'https://basemaps.cartocdn.com/dark_all/{z}/{y}/{x}{r}.png'
+                }),
+                visible: false
+            })
+        };
+
+        // ─── INITIALIZE WMS LAYERS DYNAMICALLY ───
+        const overlays = {};
+        OVERLAY_META.forEach(meta => {
+            overlays[meta.key] = new ol.layer.Image({
+                source: new ol.source.ImageWMS({
+                    url: WMS_URL,
+                    params: {
+                        LAYERS: LAYER_NAMES[activePollutant][meta.key],
+                        TILED: true,
+                    },
+                    ratio: 1.0,
+                    serverType: 'geoserver'
+                }),
+                opacity: opacityValue,
+                visible: visibilities[meta.key]
+            });
+        });
+
+        // ─── CONSTRUCT MAP INSTANCE ───
+        const map = new ol.Map({
+            target: 'map',
+            layers: [
+                basemaps.osm,
+                basemaps.esriTopo,
+                basemaps.esriImagery,
+                basemaps.cartoDark,
+                ...Object.values(overlays)
+            ],
+            view: new ol.View({
+                projection: 'EPSG:3857'
+            }),
+            controls: [
+                new ol.control.ScaleLine({ bar: true, text: true }),
+                new ol.control.FullScreen()
+            ]
+        });
+
+        // Fit map view to Turkey's Extents
+        map.getView().fit(TURKEY_EXTENT, { padding: [40, 40, 40, 40] });
+
+        // Update live coordinate tracker
+        map.on('pointermove', function (evt) {
+            const coord = evt.coordinate;
+            if (coord) {
+                const trans = ol.proj.transformExtent([coord[0], coord[1], coord[0], coord[1]], 'EPSG:3857', 'EPSG:4326');
+                document.getElementById('coords-text').textContent = trans[0].toFixed(4) + '°E , ' + trans[1].toFixed(4) + '°N';
+            }
+        });
+
+        // ─── SWITCH ACTIVE POLLUTANT FUNCTION ───
+        window.setPollutant = function (pollutant) {
+            activePollutant = pollutant;
+            
+            // Adjust pollutant UI button classes
+            document.querySelectorAll('.pollutant-btn').forEach(btn => {
+                btn.className = "pollutant-btn py-1.5 rounded font-mono text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/50 cursor-pointer transition-all";
+            });
+            document.getElementById('btn-' + pollutant).className = "pollutant-btn py-1.5 rounded font-mono text-xs font-bold bg-emerald-500 text-slate-950 shadow cursor-pointer transition-all";
+
+            // Set label indicator
+            const labelTexts = { pm10: 'Particulate Matter 10 (Trees)', no2: 'Nitrogen Dioxide (Built)', pm25: 'Particulate Matter 2.5 (Crops)' };
+            document.getElementById('pollutant-indicator-label').textContent = labelTexts[pollutant];
+
+            // Re-bind layers URLs
+            OVERLAY_META.forEach(meta => {
+                overlays[meta.key].getSource().updateParams({
+                    LAYERS: LAYER_NAMES[pollutant][meta.key]
+                });
+            });
+
+            updateLegend();
+        };
+
+        // ─── LAYER TOGGLING FUNCTION ───
+        window.toggleLayer = function (key) {
+            visibilities[key] = !visibilities[key];
+            const visible = visibilities[key];
+            overlays[key].setVisible(visible);
+
+            // Redefine row class UI styles and symbols
+            const rowElem = event.currentTarget;
+            const eyeBtn = document.getElementById('eye-' + key);
+            
+            if (visible) {
+                rowElem.className = "layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-700 bg-slate-800/60 text-white cursor-pointer";
+                eyeBtn.className = "p-1 text-emerald-400 bg-emerald-500/10 rounded";
+                eyeBtn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
+            } else {
+                rowElem.className = "layer-toggle-row flex items-center justify-between p-3 rounded-lg border border-slate-900/60 bg-slate-950/20 text-slate-505 text-slate-500 hover:text-slate-300 cursor-pointer";
+                eyeBtn.className = "p-1 text-slate-600 hover:text-slate-400";
+                eyeBtn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+            updateLegend();
+        };
+
+        // ─── BASEMAP SWITCHING FUNCTION ───
+        window.setBasemap = function (key) {
+            basemapKey = key;
+            Object.keys(basemaps).forEach(bKey => {
+                basemaps[bKey].setVisible(bKey === key);
+            });
+
+            // Adjust button UI class styles
+            document.querySelectorAll('.base-btn').forEach(btn => {
+                btn.className = "base-btn p-2.5 bg-slate-950/25 border border-slate-800 text-slate-400 rounded-lg text-left truncate flex items-center justify-between cursor-pointer hover:border-slate-700";
+                const icon = btn.querySelector('svg');
+                if (icon) icon.remove();
+            });
+
+            const activeBtn = document.getElementById('base-' + key);
+            activeBtn.className = "base-btn p-2.5 bg-indigo-600/20 border border-indigo-550 text-indigo-200 rounded-lg text-left truncate flex items-center justify-between cursor-pointer animate-once animate-duration-300";
+            activeBtn.innerHTML += '<i data-lucide="check" class="w-3 h-3 text-indigo-400"></i>';
+            lucide.createIcons();
+        };
+
+        // ─── OPACITY SLIDER CONTROLLER ───
+        const slider = document.getElementById('opacity-slider-input');
+        slider.addEventListener('input', function (e) {
+            const val = parseFloat(e.target.value);
+            opacityValue = val;
+            document.getElementById('opacity-value-label').textContent = Math.round(val * 100) + '%';
+            
+            Object.values(overlays).forEach(layer => {
+                layer.setOpacity(val);
+            });
+        });
+
+        // ─── COLLAPSIBLE SIDEBAR PANEL CONTROLLER ───
+        const sidebar = document.getElementById('layer-panel');
+        const sidebarCloseBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebarOpenBtn = document.getElementById('layer-panel-expand-btn');
+
+        sidebarCloseBtn.addEventListener('click', function () {
+            sidebar.classList.add('collapsed-sidebar');
+            sidebarOpenBtn.classList.remove('scale-0');
+            sidebarOpenBtn.classList.add('scale-100');
+        });
+
+        sidebarOpenBtn.addEventListener('click', function () {
+            sidebar.classList.remove('collapsed-sidebar');
+            sidebarOpenBtn.classList.add('scale-0');
+            sidebarOpenBtn.classList.remove('scale-100');
+        });
+
+        // ─── RECENTER TURKEY CONTAINER CONTROL ───
+        document.getElementById('recenter-btn').addEventListener('click', function () {
+            map.getView().fit(TURKEY_EXTENT, {
+                padding: [60, 60, 60, 60],
+                duration: 800
+            });
+        });
+
+        // ─── DYNAMIC GEOSERVER WMS LEGENDS HANDLER ───
+        function updateLegend() {
+            const container = document.getElementById('legend-dynamic-content');
+            container.innerHTML = '';
+
+            const activeOverlays = OVERLAY_META.filter(meta => visibilities[meta.key]);
+
+            if (activeOverlays.length === 0) {
+                container.innerHTML = '<p class="text-slate-500 font-medium italic text-xs py-2 select-none">No active overlay layers. Toggle layers in the left drawer to display graphics.</p>';
+                return;
+            }
+
+            activeOverlays.forEach(meta => {
+                const legendUrl = WMS_URL + "?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=" + LAYER_NAMES[activePollutant][meta.key] + "&legend_options=forceRuleSize:true;fontColor:0xFFFFFF;fontSize:10;fontAntiAliasing:true";
+                
+                container.innerHTML += `
+                    <div class="border-t border-slate-850 pt-2 first:border-0 first:pt-0">
+                        <span class="text-[10px] font-bold text-indigo-300 block select-none mb-1 leading-tight flex items-center gap-1">
+                            <span class="w-1 h-1 rounded-full bg-indigo-400"></span>
+                            ${meta.label}
+                        </span>
+                        <div class="bg-slate-950/40 p-2 rounded border border-slate-850 mt-1 flex justify-center min-h-[30px]">
+                            <img src="${legendUrl}" alt="${meta.label} legendRule" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'20\\'><text y=\\'15\\' fill=\\'grey\\' font-size=\\'10\\'>GeoServer Legend</text></svg>'" class="max-w-full">
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // Initialize view states
+        setPollutant('pm10');
+    </script>
+</body>
+</html>

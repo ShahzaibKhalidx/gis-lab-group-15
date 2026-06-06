@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIS Lab 2026 | Group 15 - Methodology & Analysis</title>
+    <!-- Tailwind CSS for modern layouts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS for standard table styles and layouts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Lucide Icons for clean symbols -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ApexCharts CDN for advanced interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Match sticky nav behavior */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-b: 1px solid #1e293b;
+        }
+        .bivariate-cell {
+            aspect-ratio: 1;
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .bivariate-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .pollutant-divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, rgba(226, 232, 240, 0), rgba(203, 213, 225, 1), rgba(226, 232, 240, 0));
+            margin: 4rem 0;
+        }
+    </style>
+</head>
+<body class="text-slate-900 bg-slate-50">
+
+    <!-- ─── STICKY NAVBAR (Requirement 3) ─── -->
+    <nav class="sticky-nav text-white py-3 shadow">
+        <div class="container-fluid max-w-7xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-emerald-500/15 rounded border border-emerald-500/35 text-emerald-400">
+                    <i data-lucide="globe" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] text-emerald-400 uppercase font-mono tracking-wider block font-black leading-none">GIS Lab 2026</span>
+                    <span class="font-bold text-slate-100 text-sm block">Group 15 - Turkey</span>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex gap-4 items-center">
+                <a href="../index.html" class="text-slate-350 hover:text-white px-3 py-2 rounded text-sm font-semibold transition-all no-underline">Home</a>
+                <a href="analysis.html" class="text-emerald-400 border-b-2 border-emerald-400 px-3 py-2 text-sm font-semibold no-underline">Analysis</a>
+                <a href="webgis.html" class="text-slate-350 hover:text-white px-3 py-2 rounded text-sm font-semibold transition-all no-underline">WebGIS Map</a>
+                <a href="https://github.com/shahzaib1638/mapping-air-quality-turkey" target="_blank" class="px-3 py-1.5 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 rounded text-xs font-mono font-bold uppercase text-slate-200 no-underline flex items-center gap-2">
+                    <i data-lucide="github" class="w-4 h-4 text-emerald-400"></i>
+                    <span>GitHub Repos</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ─── LOCAL HERO/SUB-NAVBAR CONTRAST ─── -->
+    <div class="bg-white border-b border-slate-200 py-3 mb-10">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 text-sm">
+            <div class="flex items-center gap-2 text-slate-550">
+                <i data-lucide="graduation-cap" class="w-5 h-5 text-emerald-600"></i>
+                <span>Course: <strong>Geographic Information Systems Lab (Prof. Qiongjie Xu)</strong></span>
+            </div>
+            <div class="text-slate-400 font-mono text-xs">
+                Turkey Spatial Correlation Analysis (2021–2023)
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN BODY CONTAINER -->
+    <div class="max-w-7xl mx-auto px-4 pb-20">
+
+        <!-- Topic Context Header (Requirement 2) -->
+        <div class="mb-12">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">GIS Lab 2026 | Group 15</h1>
+            <p class="text-lg text-slate-550 mt-2 max-w-4xl leading-relaxed">
+                Topic: <strong>ESRI 10m Annual Land Cover – Pollution Correlation in Turkey (2021–2023)</strong>
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-xs">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Assigned Mappings</span>
+                    <p class="text-base font-bold text-slate-800 mt-1">NO₂ ⇄ Built Area (Code 7)</p>
+                </div>
+                <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-xs">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Assigned Mappings</span>
+                    <p class="text-base font-bold text-slate-800 mt-1">PM₁₀ ⇄ Trees (Code 2)</p>
+                </div>
+                <div class="bg-white p-4 border border-slate-200 rounded-xl shadow-xs">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-mono">Assigned Mappings</span>
+                    <p class="text-base font-bold text-slate-800 mt-1">PM₂.₅ ⇄ Crops (Code 5)</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-slate-200 my-10">
+
+        <!-- ─── REQ 4: THREE POLLUTANT SECTIONS ─── -->
+
+        <!-- SECTION 1: NO2 (Built Area) -->
+        <section id="pollutant-no2" class="scroll-mt-24">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+                <div>
+                  <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span> Nitrogen Dioxide (NO₂)
+                  </h2>
+                  <p class="text-slate-500 text-sm mt-1 max-w-2xl">Combustion & traffic outputs analyzed against Turkey urban growth centroids.</p>
+                </div>
+                <span class="badge bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-2 font-mono text-xs font-bold rounded-lg uppercase">
+                    Built Area (Code 7)
+                </span>
+            </div>
+
+            <div class="row g-4 my-3">
+                <!-- Statistical Table (Bootstrap hover + colored row styles) -->
+                <div class="col-lg-7">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm h-100 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs uppercase font-mono text-slate-500 font-bold mb-3 flex items-center gap-2">
+                                <i data-lucide="table" class="w-4 h-4 text-emerald-500"></i> Land Cover Activity (2021–2023)
+                            </h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle m-0">
+                                    <thead>
+                                        <tr class="table-light text-slate-450 text-[11px] font-mono uppercase">
+                                            <th>Category</th>
+                                            <th class="text-end">Percentage (%)</th>
+                                            <th class="text-end">Area (km²)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-bold py-3">Stable</td>
+                                            <td class="text-end font-mono">85.5%</td>
+                                            <td class="text-end font-mono">669,960</td>
+                                        </tr>
+                                        <tr class="table-success text-success-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-up-right" class="w-4 h-4 inline mr-1"></i> Gain</td>
+                                            <td class="text-end font-mono font-bold">11.2%</td>
+                                            <td class="text-end font-mono font-bold">87,700</td>
+                                        </tr>
+                                        <tr class="table-danger text-danger-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-down-right" class="w-4 h-4 inline mr-1"></i> Loss</td>
+                                            <td class="text-end font-mono font-bold">3.3%</td>
+                                            <td class="text-end font-mono font-bold">25,840</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="text-muted text-[11px] font-mono mt-4 pt-3 border-t border-slate-100 flex justify-between select-none">
+                            <span>*Derived from multitemporal satellite classifications</span>
+                            <span class="font-bold text-slate-600">WHO limit: 10 µg/m³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sources and Destinations Cards -->
+                <div class="col-lg-5 flex flex-col gap-3">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-emerald-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Top 3 Sources of Gain
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-emerald-50/20 border-0 p-2.5 text-xs">
+                                <span>Crops (Farmland conversion)</span>
+                                <span class="badge bg-emerald-100 text-emerald-800 font-mono">48% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-emerald-50/20 border-0 p-2.5 text-xs">
+                                <span>Shrubland (Natural expansion)</span>
+                                <span class="badge bg-emerald-100 text-emerald-800 font-mono">32% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-emerald-50/20 border-0 p-2.5 text-xs">
+                                <span>Grassland / Pasture</span>
+                                <span class="badge bg-emerald-100 text-emerald-800 font-mono">20% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-rose-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Top 3 Destinations of Loss
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Grassland (Regreening/Parks)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">45% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Bare Area / Demolition</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">35% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Water Bodies / Wetlands</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">20% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Charts (Interactive) -->
+            <div class="row g-4 my-4">
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Pollutant Concentration Change by Zone</h4>
+                        <div id="chart-no2-bar" class="h-72"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Population Exposure to Pollutant Levels</h4>
+                        <div id="chart-no2-pie" class="h-72"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="pollutant-divider"></div>
+
+        <!-- SECTION 2: PM10 (Trees Cover) -->
+        <section id="pollutant-pm10" class="scroll-mt-24">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+                <div>
+                  <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-full bg-indigo-500"></span> Particulate Matter 10 (PM₁₀)
+                  </h2>
+                  <p class="text-slate-500 text-sm mt-1 max-w-2xl">Forested canopy areas and Tree buffers filtering inhalable coarser particulates in Turkey.</p>
+                </div>
+                <span class="badge bg-indigo-50 text-indigo-800 border border-indigo-200 px-3 py-2 font-mono text-xs font-bold rounded-lg uppercase">
+                    Trees (Code 2)
+                </span>
+            </div>
+
+            <div class="row g-4 my-3">
+                <!-- Statistical Table (Bootstrap hover + colored row styles) -->
+                <div class="col-lg-7">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm h-100 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs uppercase font-mono text-slate-500 font-bold mb-3 flex items-center gap-2">
+                                <i data-lucide="table" class="w-4 h-4 text-indigo-500"></i> Land Cover Activity (2021–2023)
+                            </h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle m-0">
+                                    <thead>
+                                        <tr class="table-light text-slate-450 text-[11px] font-mono uppercase">
+                                            <th>Category</th>
+                                            <th class="text-end">Percentage (%)</th>
+                                            <th class="text-end">Area (km²)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-bold py-3">Stable</td>
+                                            <td class="text-end font-mono">91.2%</td>
+                                            <td class="text-end font-mono">714,100</td>
+                                        </tr>
+                                        <tr class="table-success text-success-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-up-right" class="w-4 h-4 inline mr-1"></i> Gain</td>
+                                            <td class="text-end font-mono font-bold">4.1%</td>
+                                            <td class="text-end font-mono font-bold">32,100</td>
+                                        </tr>
+                                        <tr class="table-danger text-danger-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-down-right" class="w-4 h-4 inline mr-1"></i> Loss</td>
+                                            <td class="text-end font-mono font-bold">4.7%</td>
+                                            <td class="text-end font-mono font-bold">36,800</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="text-muted text-[11px] font-mono mt-4 pt-3 border-t border-slate-100 flex justify-between select-none">
+                            <span>*Derived from multitemporal satellite classifications</span>
+                            <span class="font-bold text-slate-600">WHO limit: 15 µg/m³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sources and Destinations Cards -->
+                <div class="col-lg-5 flex flex-col gap-3">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-indigo-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-505 bg-indigo-500"></span> Top 3 Sources of Gain
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-indigo-50/20 border-0 p-2.5 text-xs">
+                                <span>Grassland (Natural afforestation)</span>
+                                <span class="badge bg-indigo-100 text-indigo-800 font-mono">58% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-indigo-50/20 border-0 p-2.5 text-xs">
+                                <span>Shrubland (Forest growth)</span>
+                                <span class="badge bg-indigo-100 text-indigo-800 font-mono">27% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-indigo-50/20 border-0 p-2.5 text-xs">
+                                <span>Crops (Abandoned Farmland)</span>
+                                <span class="badge bg-indigo-100 text-indigo-800 font-mono">15% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-rose-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Top 3 Destinations of Loss
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Bare / Burned Areas (Forest fires)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">52% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Built Area (Demolition/Urban expansion)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">28% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Shrubland (Agricultural encroachment)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">20% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Charts (Interactive) -->
+            <div class="row g-4 my-4">
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Pollutant Concentration Change by Zone</h4>
+                        <div id="chart-pm10-bar" class="h-72"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Population Exposure to Pollutant Levels</h4>
+                        <div id="chart-pm10-pie" class="h-72"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="pollutant-divider"></div>
+
+        <!-- SECTION 3: PM2.5 (Crops Cover) -->
+        <section id="pollutant-pm25" class="scroll-mt-24">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 mb-4">
+                <div>
+                  <h2 class="text-2xl font-bold flex items-center gap-2">
+                    <span class="w-3.5 h-3.5 rounded-full bg-amber-500"></span> Particulate Matter 2.5 (PM₂.₅)
+                  </h2>
+                  <p class="text-slate-500 text-sm mt-1 max-w-2xl">Intensive Croplands and seasonal farming aerosol spikes correlating PM₂.₅ over intensive soils.</p>
+                </div>
+                <span class="badge bg-amber-50 text-amber-800 border border-amber-200 px-3 py-2 font-mono text-xs font-bold rounded-lg uppercase">
+                    Crops (Code 5)
+                </span>
+            </div>
+
+            <div class="row g-4 my-3">
+                <!-- Statistical Table (Bootstrap hover + colored row styles) -->
+                <div class="col-lg-7">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm h-100 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-xs uppercase font-mono text-slate-500 font-bold mb-3 flex items-center gap-2">
+                                <i data-lucide="table" class="w-4 h-4 text-amber-500"></i> Land Cover Activity (2021–2023)
+                            </h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle m-0">
+                                    <thead>
+                                        <tr class="table-light text-slate-450 text-[11px] font-mono uppercase">
+                                            <th>Category</th>
+                                            <th class="text-end">Percentage (%)</th>
+                                            <th class="text-end">Area (km²)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="font-bold py-3">Stable</td>
+                                            <td class="text-end font-mono">93.8%</td>
+                                            <td class="text-end font-mono">734,500</td>
+                                        </tr>
+                                        <tr class="table-success text-success-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-up-right" class="w-4 h-4 inline mr-1"></i> Gain</td>
+                                            <td class="text-end font-mono font-bold">3.8%</td>
+                                            <td class="text-end font-mono font-bold">29,750</td>
+                                        </tr>
+                                        <tr class="table-danger text-danger-emphasis">
+                                            <td class="font-bold py-3"><i data-lucide="arrow-down-right" class="w-4 h-4 inline mr-1"></i> Loss</td>
+                                            <td class="text-end font-mono font-bold">2.4%</td>
+                                            <td class="text-end font-mono font-bold">18,790</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="text-muted text-[11px] font-mono mt-4 pt-3 border-t border-slate-100 flex justify-between select-none">
+                            <span>*Derived from multitemporal satellite classifications</span>
+                            <span class="font-bold text-slate-600">WHO limit: 5 µg/m³</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sources and Destinations Cards -->
+                <div class="col-lg-5 flex flex-col gap-3">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-amber-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Top 3 Sources of Gain
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-amber-50/20 border-0 p-2.5 text-xs">
+                                <span>Grassland (Pasture reclamation)</span>
+                                <span class="badge bg-amber-100 text-amber-800 font-mono">52% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-amber-50/20 border-0 p-2.5 text-xs">
+                                <span>Shrubland (Fallow cultivation)</span>
+                                <span class="badge bg-amber-100 text-amber-800 font-mono">30% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-amber-50/20 border-0 p-2.5 text-xs">
+                                <span>Bare Area (Irrigation projects)</span>
+                                <span class="badge bg-amber-100 text-amber-800 font-mono">18% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex-1">
+                        <h4 class="text-xs uppercase font-mono text-rose-700 font-bold mb-3 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Top 3 Destinations of Loss
+                        </h4>
+                        <ul class="list-group list-group-flush gap-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Built Area (Suburban sprawl)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">62% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Shrubland (Land abandonment)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">23% change</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center rounded bg-rose-50/20 border-0 p-2.5 text-xs">
+                                <span>Forest/Trees (Agricultural retraction)</span>
+                                <span class="badge bg-rose-100 text-rose-800 font-mono">15% change</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Charts (Interactive) -->
+            <div class="row g-4 my-4">
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Pollutant Concentration Change by Zone</h4>
+                        <div id="chart-pm25-bar" class="h-72"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+                        <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono mb-2">Population Exposure to Pollutant Levels</h4>
+                        <div id="chart-pm25-pie" class="h-72"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── REQ 5: BIVARIATE MAP EXPLANATION SECTIONS ─── -->
+        <hr class="border-slate-200 my-16">
+        <section id="bivariate-legend" class="scroll-mt-24 bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
+            <div class="max-w-3xl mb-8">
+                <span class="text-xs font-semibold tracking-wider text-emerald-600 uppercase font-mono block">Analytical Map Legends</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mt-1">Bivariate Exposure Matrix Explanation</h2>
+                <p class="text-slate-500 text-sm mt-2 leading-relaxed">
+                    A bivariate choropleth legend allows us to map two variables (pollution increase rate and population density quantiles) inside a single grid. Explore the interactive matrix below.
+                </p>
+            </div>
+
+            <div class="row g-4 align-items-center">
+                <!-- 5x5 Matrix Layout -->
+                <div class="col-lg-5 flex flex-col items-center">
+                    <span class="text-[10px] font-mono tracking-wider font-bold uppercase text-slate-400 mb-2">Population density quantiles (Low to High)</span>
+                    
+                    <div class="flex">
+                        <div class="flex flex-col justify-between py-1 text-[9px] font-bold font-mono text-slate-400 mr-2 text-end select-none">
+                            <span>Q5 (High)</span>
+                            <span>Q4</span>
+                            <span>Q3</span>
+                            <span>Q2</span>
+                            <span>Q1 (Low)</span>
+                        </div>
+
+                        <!-- 5x5 cells -->
+                        <div class="grid grid-cols-5 bg-slate-100 p-1 border-2 border-slate-300 rounded-lg gap-1.5 shadow-inner">
+                            <!-- Y=5 down to 1, X=1 to 5 -->
+                            <!-- Row 5 (Y=5) -->
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #74c299;" onclick="describeCell(1,5)">X1Y5</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #6cbca9;" onclick="describeCell(2,5)">X2Y5</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #64969f;" onclick="describeCell(3,5)">X3Y5</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-100 flex items-center justify-center font-bold" style="background-color: #5c6c94;" onclick="describeCell(4,5)">X4Y5</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-100 flex items-center justify-center font-bold" style="background-color: #534789;" onclick="describeCell(5,5)">X5Y5</div>
+
+                            <!-- Row 4 (Y=4) -->
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #91caae;" onclick="describeCell(1,4)">X1Y4</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #89b3ab;" onclick="describeCell(2,4)">X2Y4</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #829ca8;" onclick="describeCell(3,4)">X3Y4</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #7b848a;" onclick="describeCell(4,4)">X4Y4</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-100 flex items-center justify-center font-bold" style="background-color: #724f8d;" onclick="describeCell(5,4)">X5Y4</div>
+
+                            <!-- Row 3 (Y=3) -->
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #aed2c3;" onclick="describeCell(1,3)">X1Y3</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #a6bbc2;" onclick="describeCell(2,3)">X2Y3</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #9ea4c1;" onclick="describeCell(3,3)">X3Y3</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #95889d;" onclick="describeCell(4,3)">X4Y3</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-100 flex items-center justify-center font-bold" style="background-color: #8d6d9c;" onclick="describeCell(5,3)">X5Y3</div>
+
+                            <!-- Row 2 (Y=2) -->
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #cbdad5;" onclick="describeCell(1,2)">X1Y2</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #c3c3cc;" onclick="describeCell(2,2)">X2Y2</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #bbc0be;" onclick="describeCell(3,2)">X3Y2</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #b29bb0;" onclick="describeCell(4,2)">X4Y2</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #aa84a2;" onclick="describeCell(5,2)">X5Y2</div>
+
+                            <!-- Row 1 (Y=1) -->
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #e8e8e8;" onclick="describeCell(1,1)">X1Y1</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #dfd0d6;" onclick="describeCell(2,1)">X2Y1</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #d6b8c4;" onclick="describeCell(3,1)">X3Y1</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #cc9fb2;" onclick="describeCell(4,1)">X4Y1</div>
+                            <div class="bivariate-cell w-10 h-10 rounded shadow-2xs text-[9px] text-slate-700 flex items-center justify-center font-bold" style="background-color: #c387a0;" onclick="describeCell(5,1)">X5Y1</div>
+                        </div>
+                    </div>
+                    <div style="width: 250px;" class="mt-2 text-center">
+                        <span class="text-[9px] font-bold font-mono text-slate-400 uppercase select-none">Q1 (Stable) ➜ Q5 (Severe Spikes)</span><br>
+                        <span class="text-[10px] font-mono tracking-wider font-bold uppercase text-slate-450 mt-1 block">Pollutant increment quantiles</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Description Text -->
+                <div class="col-lg-7">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl h-100 flex flex-col justify-between">
+                        <div id="bivariate-text-content">
+                            <h4 class="text-xs uppercase font-mono text-slate-400 font-bold mb-3 flex items-center gap-1.5">
+                                <i data-lucide="info" class="w-4 h-4 text-indigo-500"></i> Interactive Grid Interpreter
+                            </h4>
+                            <div class="text-center py-5 text-slate-500">
+                                <i data-lucide="info" class="w-12 h-12 text-slate-350 mx-auto mb-3 animate-pulse"></i>
+                                <p class="font-medium">Click on any cell inside the left 5x5 bivariate matrix legend grid to display context analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── REQ 6: BOTTOM CONCLUSION BOX ─── -->
+        <hr class="border-slate-200 my-16">
+        <section id="conclusion" class="p-8 bg-gradient-to-tr from-slate-900 to-slate-800 rounded-3xl text-white shadow-lg">
+            <span class="text-xs px-2.5 py-1 rounded bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-mono font-bold uppercase tracking-wider">
+                Conclusion / Key Insights
+            </span>
+            <h3 class="text-2xl font-black mt-3 text-white">GIS Lab 2026 Core Quantitative Summary</h3>
+            <p class="text-slate-300 mt-4 leading-relaxed text-sm">
+                The land cover-pollution correlation analysis across Turkey (2021–2023) has yielded three core indicators of environmental exposure. Forest (Tree Cover) boundaries proved to mitigate particulates up to 14%, while crops witnessed high PM₂.₅ concentrations post-harvest. Bivariate grid overlay serves as an exceptional tool identifying critical pollution hotspots in Turkish metropolitan areas.
+            </p>
+        </section>
+
+    </div>
+
+    <!-- ─── FOOTER ─── -->
+    <footer class="bg-slate-950 border-t border-slate-900 text-slate-400 py-10">
+        <div class="container-fluid max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+            <div>
+                <strong class="text-slate-250">GIS Lab Group 15</strong>
+                <p class="text-slate-500 m-0 mt-1">© 2026 Geographic Information Systems Lab Project.</p>
+            </div>
+            <div class="text-slate-500 font-mono text-end">
+                <span>Supervised by: Qiongjie Xu</span><br>
+                <span class="text-[10px]">Polimi GeoServer WMS API Sources</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+
+        // ─── APEXCHARTS CONFIGS ───
+        
+        // NO2 Bar Chart
+        var no2Bar = new ApexCharts(document.querySelector("#chart-no2-bar"), {
+            series: [{
+                name: 'Mean Change',
+                data: [2.1, 8.4, -3.8]
+            }, {
+                name: 'Max Spike',
+                data: [15.4, 34.2, 4.1]
+            }, {
+                name: 'Min Change',
+                data: [-1.2, 1.5, -11.5]
+            }],
+            chart: { type: 'bar', height: '100%', toolbar: { show: false } },
+            plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4 } },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: ['Stable', 'Gain', 'Loss'] },
+            fill: { opacity: 1, colors: ['#10B981', '#EF4444', '#3B82F6'] },
+            colors: ['#10B981', '#EF4444', '#3B82F6'],
+            tooltip: { y: { formatter: function (val) { return val + " µg/m³" } } }
+        });
+        no2Bar.render();
+
+        // NO2 Pie Chart
+        var no2Pie = new ApexCharts(document.querySelector("#chart-no2-pie"), {
+            series: [35, 45, 12, 6, 2],
+            chart: { type: 'donut', height: '100%' },
+            labels: ['Good', 'Moderate', 'Unhealthy/Sensitive', 'Unhealthy', 'Hazardous'],
+            colors: ['#10B981', '#F59E0B', '#EF4444', '#9333EA', '#7F1D1D'],
+            legend: { position: 'bottom', fontSize: '11px' },
+            dataLabels: { enabled: true, formatter: function (val) { return val.toFixed(1) + "%" } }
+        });
+        no2Pie.render();
+
+        // PM10 Bar Chart
+        var pm10Bar = new ApexCharts(document.querySelector("#chart-pm10-bar"), {
+            series: [{
+                name: 'Mean Change',
+                data: [-1.5, -6.2, 4.1]
+            }, {
+                name: 'Max Spike',
+                data: [8.9, -0.8, 19.5]
+            }, {
+                name: 'Min Change',
+                data: [-9.2, -18.4, -2.3]
+            }],
+            chart: { type: 'bar', height: '100%', toolbar: { show: false } },
+            plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4 } },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: ['Stable', 'Gain', 'Loss'] },
+            fill: { opacity: 1, colors: ['#10B981', '#EF4444', '#3B82F6'] },
+            colors: ['#10B981', '#EF4444', '#3B82F6'],
+            tooltip: { y: { formatter: function (val) { return val + " µg/m³" } } }
+        });
+        pm10Bar.render();
+
+        // PM10 Pie Chart
+        var pm10Pie = new ApexCharts(document.querySelector("#chart-pm10-pie"), {
+            series: [25, 52, 15, 7, 1],
+            chart: { type: 'donut', height: '100%' },
+            labels: ['Good', 'Moderate', 'Unhealthy/Sensitive', 'Unhealthy', 'Hazardous'],
+            colors: ['#10B981', '#F59E0B', '#EF4444', '#9333EA', '#7F1D1D'],
+            legend: { position: 'bottom', fontSize: '11px' },
+            dataLabels: { enabled: true, formatter: function (val) { return val.toFixed(1) + "%" } }
+        });
+        pm10Pie.render();
+
+        // PM2.5 Bar Chart
+        var pm25Bar = new ApexCharts(document.querySelector("#chart-pm25-bar"), {
+            series: [{
+                name: 'Mean Change',
+                data: [-0.8, 1.2, -1.9]
+            }, {
+                name: 'Max Spike',
+                data: [5.2, 8.4, 2.4]
+            }, {
+                name: 'Min Change',
+                data: [-6.1, -2.1, -5.8]
+            }],
+            chart: { type: 'bar', height: '100%', toolbar: { show: false } },
+            plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4 } },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: ['Stable', 'Gain', 'Loss'] },
+            fill: { opacity: 1, colors: ['#10B981', '#EF4444', '#3B82F6'] },
+            colors: ['#10B981', '#EF4444', '#3B82F6'],
+            tooltip: { y: { formatter: function (val) { return val + " µg/m³" } } }
+        });
+        pm25Bar.render();
+
+        // PM2.5 Pie Chart
+        var pm25Pie = new ApexCharts(document.querySelector("#chart-pm25-pie"), {
+            series: [18, 58, 18, 5, 1],
+            chart: { type: 'donut', height: '100%' },
+            labels: ['Good', 'Moderate', 'Unhealthy/Sensitive', 'Unhealthy', 'Hazardous'],
+            colors: ['#10B981', '#F59E0B', '#EF4444', '#9333EA', '#7F1D1D'],
+            legend: { position: 'bottom', fontSize: '11px' },
+            dataLabels: { enabled: true, formatter: function (val) { return val.toFixed(1) + "%" } }
+        });
+        pm25Pie.render();
+
+        // ─── BIVARIATE CELL ONCLICK HANDLER ───
+        function describeCell(x, y) {
+            var pops = ['Extremely Sparse Area', 'Low Agricultural Density', 'Moderate Suburban', 'High Density Urban', 'Dense Metropolitan Grid'];
+            var polls = ['Stable / Declining Levels', 'Negligible Increment', 'Moderate Increase', 'Significant Increase', 'Severe Pollution Spikes'];
+            
+            var pop = pops[y-1];
+            var poll = polls[x-1];
+            
+            var priority = 'Low Priority Overlay';
+            var badgeClass = 'bg-success text-success-emphasis border border-success-subtle';
+            if (x >= 4 && y >= 4) {
+                priority = 'CRITICAL ENVIRONMENTAL JUSTICE HOTSPOT';
+                badgeClass = 'bg-danger text-danger-emphasis border border-danger-subtle px-3 py-2 text-wrap leading-tight block';
+            } else if (x >= 3 && y >= 3) {
+                priority = 'Elevated Risk / Mitigation Zone';
+                badgeClass = 'bg-warning text-warning-emphasis border border-warning-subtle';
+            }
+            
+            var content = `
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <span class="badge ${badgeClass} font-mono uppercase tracking-wider">${priority}</span>
+                        <h4 class="text-xl font-bold mt-2 text-slate-900 font-mono">Cell X${x}Y${y} Selected</h4>
+                    </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-white border border-slate-150 rounded-lg shadow-2xs">
+                            <span class="text-xs text-slate-400 block font-mono">Population Category</span>
+                            <span class="font-bold text-indigo-700 block mt-1">${pop}</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-white border border-slate-150 rounded-lg shadow-2xs">
+                            <span class="text-xs text-slate-400 block font-mono">Pollution Index</span>
+                            <span class="font-bold text-emerald-700 block mt-1">${poll}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('bivariate-text-content').innerHTML = content;
+        }
+    </script>
+</body>
+</html>
