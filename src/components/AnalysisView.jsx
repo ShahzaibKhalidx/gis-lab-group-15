@@ -107,7 +107,7 @@ export default function AnalysisView() {
               <h3 className="font-bold text-slate-900 font-mono text-xs uppercase tracking-wider">Particulate Matter 2.5</h3>
             </div>
             <p className="text-2xl font-extrabold text-slate-900 font-sans">PM₂.₅ ⇄ Croplands</p>
-            <p className="text-slate-500 text-xs mt-2 font-medium">Correlation target checking agricultural harvest zones (Code 5) against season aerosol trends.</p>
+            <p className="text-slate-500 text-xs mt-2 font-medium">Correlation target comparing Crops (Code 5) land-cover transitions with PM₂.₅ AMAC change and population exposure.</p>
           </div>
         </div>
 
@@ -509,8 +509,9 @@ export default function AnalysisView() {
                         <thead>
                           <tr className="border-b border-slate-200 text-slate-400 text-[10px] font-mono text-left uppercase">
                             <th className="py-3 px-4 font-bold">Category Type</th>
-                            <th className="py-3 px-4 font-bold text-right">Expansion Rate (%)</th>
-                            <th className="py-3 px-4 font-bold text-right">Coverage Area (km²)</th>
+                            <th className="py-3 px-4 font-bold text-right">Pixels</th>
+                            <th className="py-3 px-4 font-bold text-right">Area Share (%)</th>
+                            <th className="py-3 px-4 font-bold text-right">Area (km²)</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -528,10 +529,17 @@ export default function AnalysisView() {
                               <tr key={row.category} className={`border-b border-slate-100 transition-colors ${rowClass}`}>
                                 <td className="py-3 px-4 flex items-center gap-1.5 font-bold">
                                   {statSymbol}
-                                  {row.category} Zone
+                                  {row.label || `${row.category} Zone`}
                                 </td>
-                                <td className="py-3 px-4 text-right font-mono font-bold">{row.percentage.toFixed(1)}%</td>
-                                <td className="py-3 px-4 text-right font-mono font-bold">{row.area.toLocaleString()} km²</td>
+                                <td className="py-3 px-4 text-right font-mono font-bold">
+                                  {row.pixels ? row.pixels.toLocaleString() : '—'}
+                                </td>
+                                <td className="py-3 px-4 text-right font-mono font-bold">
+                                  {Number(row.percentage).toFixed(2)}%
+                                </td>
+                                <td className="py-3 px-4 text-right font-mono font-bold">
+                                  {Number(row.area).toLocaleString(undefined, { maximumFractionDigits: 2 })} km²
+                                </td>
                               </tr>
                             );
                           })}
@@ -557,10 +565,18 @@ export default function AnalysisView() {
                     </h4>
                     <div className="space-y-2.5">
                       {item.topGains.map((flux, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2.5 rounded-lg bg-emerald-50/20 border border-emerald-500/10">
+                     <div key={idx} className="p-2.5 rounded-lg bg-emerald-50/20 border border-emerald-500/10">
+                        <div className="flex justify-between items-center gap-3">
                           <span className="text-slate-700 font-medium text-xs">{flux.class}</span>
-                          <span className="font-mono text-emerald-700 text-xs font-extrabold">{flux.value}% conversion</span>
+                          <span className="font-mono text-emerald-700 text-xs font-extrabold">
+                            {Number(flux.value).toFixed(2)}%
+                          </span>
                         </div>
+                        <div className="mt-1 flex justify-between text-[9px] text-slate-400 font-mono">
+                          <span>{flux.pixels ? flux.pixels.toLocaleString() : '—'} pixels</span>
+                          <span>{flux.area ? Number(flux.area).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—'} km²</span>
+                        </div>
+                      </div>
                       ))}
                     </div>
                   </div>
@@ -573,9 +589,17 @@ export default function AnalysisView() {
                     </h4>
                     <div className="space-y-2.5">
                       {item.topLosses.map((flux, idx) => (
-                        <div key={idx} className="flex justify-between items-center p-2.5 rounded-lg bg-rose-50/25 border border-rose-500/10">
-                          <span className="text-slate-700 font-medium text-xs">{flux.class}</span>
-                          <span className="font-mono text-rose-700 text-xs font-extrabold">{flux.value}% transition</span>
+                        <div key={idx} className="p-2.5 rounded-lg bg-rose-50/25 border border-rose-500/10">
+                          <div className="flex justify-between items-center gap-3">
+                            <span className="text-slate-700 font-medium text-xs">{flux.class}</span>
+                            <span className="font-mono text-rose-700 text-xs font-extrabold">
+                              {Number(flux.value).toFixed(2)}%
+                            </span>
+                          </div>
+                          <div className="mt-1 flex justify-between text-[9px] text-slate-400 font-mono">
+                            <span>{flux.pixels ? flux.pixels.toLocaleString() : '—'} pixels</span>
+                            <span>{flux.area ? Number(flux.area).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '—'} km²</span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -660,12 +684,23 @@ export default function AnalysisView() {
 
                     <div className="flex flex-col gap-2">
                       {item.exposureData.map((entry, idx) => (
-                        <div key={idx} className="flex justify-between items-center text-[10px] font-mono">
+                        <div key={idx} className="flex justify-between items-start text-[10px] font-mono gap-3">
                           <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-                            <span className="text-slate-500 font-bold truncate max-w-[130px]">{entry.category.split(' (')[0]}</span>
+                            <span className="text-slate-500 font-bold truncate max-w-[130px]">
+                              {entry.category.split(' (')[0]}
+                            </span>
                           </div>
-                          <span className="font-bold text-slate-900">{entry.value}%</span>
+                          <div className="text-right">
+                            <span className="font-bold text-slate-900 block">
+                              {Number(entry.value).toFixed(2)}%
+                            </span>
+                            {entry.population !== undefined && (
+                              <span className="text-[8px] text-slate-400">
+                                {entry.population.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -833,7 +868,7 @@ export default function AnalysisView() {
               <li className="flex gap-3">
                 <span className="text-emerald-400 font-bold font-mono text-sm leading-none">02.</span>
                 <span>
-                  <strong>Crop-Aerosol Correlation:</strong> Crop regions (Code 5) coincide heavily with fine particulate (PM₂.₅) surges. The maximum peaks occurred consistently following harvest intervals, advocating for modern mechanical agricultural methodologies that decrease airborne dust and regional fertilizer volatilization.
+                  <strong>Crop-PM₂.₅ Relationship:</strong> For the PM₂.₅ analysis, Crops (Code 5) were used as the target land-cover class. Stable Crops account for 79.35% of crops-related transition pixels, while Gain to Crops and Loss from Crops represent 14.29% and 6.36%, respectively. Most crop gains come from Rangeland to Crops, and most crop losses go from Crops to Rangeland. The zonal statistics show negative mean PM₂.₅ AMAC values across all three crop-transition zones. Population exposure is mainly concentrated in PM₂.₅ Class 3, covering 74.51% of the valid classified population.
                 </span>
               </li>
               <li className="flex gap-3">

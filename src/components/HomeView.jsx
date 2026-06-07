@@ -156,7 +156,7 @@ export default function HomeView({ onNavigate }) {
             </h3>
             <span className="text-[10px] text-slate-400 uppercase font-mono font-extrabold tracking-wider mb-4 block">Mapped target: Crops (Cropland)</span>
             <p className="text-slate-500 text-sm leading-relaxed flex-grow">
-              Measures fine inhalable particles across Turkey’s extensive crop basins and seasonal agricultural zones post-harvest.
+              Measures fine particulate exposure across Turkey’s cropland transition zones, using Crops (Code 5) as the assigned land-cover class.
             </p>
             <div className="mt-6 pt-5 border-t border-slate-100 flex items-baseline justify-between font-mono text-xs">
               <span className="text-slate-400 uppercase font-bold">Inhabitant Reach</span>
@@ -234,7 +234,7 @@ export default function HomeView({ onNavigate }) {
                 <div>
                   <h4 className="text-base font-bold text-white uppercase font-sans">Agricultural Cropland Dynamics</h4>
                   <p className="text-slate-450 text-xs mt-1.5 leading-relaxed">
-                    Croplands (Code 5) undergo massive seasonal spikes in fine pm2.5 aggregates post-harvest, indicating significant local particulate suspension.
+                    For PM₂.₅, Crops (Code 5) were used as the target land-cover class. Stable Crops represent 79.35% of crops-related transition pixels, while Gain to Crops and Loss from Crops represent 14.29% and 6.36%, respectively.
                   </p>
                 </div>
               </div>

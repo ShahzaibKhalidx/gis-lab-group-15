@@ -21,13 +21,14 @@ const LAYER_NAMES = {
     average2023:     'gisgeoserver_15:Turkey_average_no2_2023',
     cams2023:        'gisgeoserver_15:Turkey_CAMS_no2_2023_12',
   },
+
   pm25: {
     concentration:   'gisgeoserver_15:Turkey_pm2p5_concentration_map_2023',
     amac:            'gisgeoserver_15:Turkey_pm2p5_2021_2023_AMAC_map',
     landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
-    bivariate:       'gisgeoserver_15:Turkey_pm2p5_pol_2023_bivariate',
-    population:      'gisgeoserver_15:YOUR_PM25_POPULATION_LAYER',
-    zonalStatistics: 'gisgeoserver_15:Turkey_pm2p5_zonal_statistics',
+    bivariate:       'gisgeoserver_15:Turkey_pm2p5_2023_bivariate.gpkg',
+    population:      'gisgeoserver_15:Turkey_pm2p5_2023_chart.gpkg',
+    zonalStatistics: 'gisgeoserver_15:Turkey_pm2p5_zonal_statistics_2021_2023',
     average2023:     'gisgeoserver_15:Turkey_average_pm2p5_2023',
     cams2023:        'gisgeoserver_15:Turkey_CAMS_pm2p5_2023_12',
   },
@@ -130,14 +131,18 @@ export default function WebGISView() {
     const overlays = {};
     OVERLAY_META.forEach(({ key }) => {
       overlays[key] = new ImageLayer({
+
         source: new ImageWMS({
           url: WMS_URL,
           params: {
             LAYERS: LAYER_NAMES[activePollutant][key],
-            TILED: true,
-          },
-          ratio: 1.0,
-          serverType: 'geoserver',
+            FORMAT: 'image/png',
+            TRANSPARENT: true,
+            VERSION: '1.1.1',
+           },
+           ratio: 1.0,
+           serverType: 'geoserver',
+           crossOrigin: 'anonymous',
         }),
         opacity,
         visible: visibilities[key],

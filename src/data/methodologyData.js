@@ -85,37 +85,125 @@ export const methodologyData = {
   },
   pm25: {
     title: 'Particulate Matter 2.5 (PM₂.₅)',
-    shortDesc: 'Fine dust levels analyzed in relation to intensive crops and farmland zones.',
-    description: 'Particulate Matter 2.5 (PM₂.₅) represents fine aerosols with extreme cardiovascular health impacts. Intensive agricultural croplands (Crops) correlate with seasonal PM₂.₅ spikes due to fertilizer emissions and harvest harvesting dust.',
+    shortDesc: 'Fine particulate matter analyzed in relation to cropland transitions.',
+    description: 'Particulate Matter 2.5 (PM₂.₅) represents fine aerosols with important health impacts. In this analysis, Crops (Code 5) are used as the target land-cover class to compare stable, gain, and loss cropland zones with PM₂.₅ concentration changes and population exposure.',
     associatedLandCover: 'Crops (Cropland)',
     landCoverCode: 5,
-    benchmark: 'WHO annual mean limit: 5 µg/m³',
+    benchmark: 'EU / course class threshold: Class 1 ≤ 5 µg/m³',
     stats: [
-      { category: 'Stable', percentage: 93.8, area: 734500 },
-      { category: 'Gain', percentage: 3.8, area: 29750 },
-      { category: 'Loss', percentage: 2.4, area: 18790 }
+      {
+        category: 'Stable',
+        label: 'Stable Crops',
+        pixels: 1949281999,
+        area: 194928.20,
+        percentage: 79.35
+      },
+      {
+        category: 'Gain',
+        label: 'Gain to Crops',
+        pixels: 351083907,
+        area: 35108.39,
+        percentage: 14.29
+      },
+      {
+        category: 'Loss',
+        label: 'Loss from Crops',
+        pixels: 156327078,
+        area: 15632.71,
+        percentage: 6.36
+      }
     ],
     topGains: [
-      { class: 'Grassland (Pasture reclamation)', value: 52 },
-      { class: 'Shrubland (Fallow cultivation)', value: 30 },
-      { class: 'Bare Area (Irrigation projects)', value: 18 }
+      {
+        class: 'Rangeland → Crops',
+        pixels: 331621734,
+        area: 33162.17,
+        value: 94.46
+      },
+      {
+        class: 'Built Area → Crops',
+        pixels: 11409048,
+        area: 1140.90,
+        value: 3.25
+      },
+      {
+        class: 'Trees → Crops',
+        pixels: 5761802,
+        area: 576.18,
+        value: 1.64
+      }
     ],
     topLosses: [
-      { class: 'Built Area (Suburban sprawl)', value: 62 },
-      { class: 'Shrubland (Land abandonment)', value: 23 },
-      { class: 'Forest/Trees (Agricultural retraction)', value: 15 }
+      {
+        class: 'Crops → Rangeland',
+        pixels: 120181022,
+        area: 12018.10,
+        value: 76.88
+      },
+      {
+        class: 'Crops → Built Area',
+        pixels: 21101202,
+        area: 2110.12,
+        value: 13.50
+      },
+      {
+        class: 'Crops → Trees',
+        pixels: 12955178,
+        area: 1295.52,
+        value: 8.29
+      }
     ],
     chloroplethData: [
-      { zone: 'Stable', mean: -0.8, max: 5.2, min: -6.1 },
-      { zone: 'Gain', mean: 1.2, max: 8.4, min: -2.1 },
-      { zone: 'Loss', mean: -1.9, max: 2.4, min: -5.8 }
+      {
+        zone: 'Stable Crops',
+        mean: -1.05,
+        min: -15.98,
+        max: 4.18
+      },
+      {
+        zone: 'Gain to Crops',
+        mean: -1.85,
+        min: -7.29,
+        max: 3.72
+      },
+      {
+        zone: 'Loss from Crops',
+        mean: -0.88,
+        min: -15.98,
+        max: 4.03
+      }
     ],
     exposureData: [
-      { category: 'Good (0-5 µg/m³)', value: 18, color: '#10B981' },
-      { category: 'Moderate (5-10 µg/m³)', value: 58, color: '#F59E0B' },
-      { category: 'Unhealthy for Sensitive (10-15 µg/m³)', value: 18, color: '#EF4444' },
-      { category: 'Unhealthy (15-25 µg/m³)', value: 5, color: '#9333EA' },
-      { category: 'Hazardous (>25 µg/m³)', value: 1, color: '#7F1D1D' }
+      {
+        category: 'Class 1 (≤5 µg/m³)',
+        population: 0,
+        value: 0.00,
+        color: '#10B981'
+      },
+      {
+        category: 'Class 2 (>5–10 µg/m³)',
+        population: 2390748,
+        value: 2.80,
+        color: '#3B82F6'
+      },
+      {
+        category: 'Class 3 (>10–20 µg/m³)',
+        population: 63658511,
+        value: 74.51,
+        color: '#F59E0B'
+      },
+      {
+        category: 'Class 4 (>20–25 µg/m³)',
+        population: 15401816,
+        value: 18.03,
+        color: '#EF4444'
+      },
+      {
+        category: 'Class 5 (>25 µg/m³)',
+        population: 3982586,
+        value: 4.66,
+        color: '#8E44AD'
+      }
     ],
     colorTheme: {
       primary: 'bg-amber-500',
