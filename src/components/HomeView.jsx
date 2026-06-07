@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Wind, Cloud, Zap, ShieldAlert, Database, MapPin, ArrowRight, Table } from 'lucide-react';
+import { Wind, Cloud, Zap, ShieldAlert, Database, MapPin, ArrowRight, Table, Users, Mail, GraduationCap } from 'lucide-react';
 import turkeySatellite from '../assets/images/turkey_satellite_1780705843222.png';
 
 export default function HomeView({ onNavigate }) {
@@ -303,6 +303,72 @@ export default function HomeView({ onNavigate }) {
             </p>
           </div>
 
+        </div>
+      </div>
+
+      {/* ─── GROUP MEMBERS SECTION ─── */}
+      <div id="group-members-section" className="bg-slate-100 border-t border-slate-200 py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-emerald-600 font-mono text-xs uppercase font-extrabold tracking-widest flex items-center justify-center gap-1.5">
+              <GraduationCap className="w-4 h-4" /> Academic Group Core Members
+            </span>
+            <h2 id="team-title" className="text-3xl font-extrabold tracking-tight text-slate-950 mt-1 font-sans">
+              GIS Project Group 15
+            </h2>
+            <p className="text-slate-500 mt-2 text-sm font-medium">
+              Research project collaborators & developers analyzing temporal spatial atmospheric variations in Turkey.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            
+            {/* Member Card 1 */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4 hover:border-emerald-200 hover:shadow-md transition-all">
+              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg select-none border border-blue-100 uppercase flex-shrink-0">
+                NR
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-extrabold text-slate-900 whitespace-normal break-words" title="Nicolas Alejandro Rodriguez Martinez">Nicolas Alejandro Rodriguez Martinez</h4>
+                <p className="text-[11px] font-mono text-slate-400 mt-0.5">Assigned: <span className="font-bold text-blue-600">NO₂ (Nitrogen Dioxide)</span></p>
+                <a href="mailto:nicolasalejandro.rodriguez@mail.polimi.it" className="text-xs text-slate-500 flex items-center gap-1 mt-1.5 hover:text-emerald-600 font-sans transition-colors">
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                  <span className="truncate">nicolasalejandro.rodriguez@mail.polimi.it</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Member Card 2 */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4 hover:border-emerald-200 hover:shadow-md transition-all">
+              <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg select-none border border-amber-100 uppercase flex-shrink-0">
+                QX
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-extrabold text-slate-900 whitespace-normal break-words">Qiling Xiong</h4>
+                <p className="text-[11px] font-mono text-slate-400 mt-0.5">Assigned: <span className="font-bold text-amber-600">PM₂.₅ Particulates</span></p>
+                <a href="mailto:qiling.xiong@mail.polimi.it" className="text-xs text-slate-500 flex items-center gap-1 mt-1.5 hover:text-emerald-600 font-sans transition-colors">
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                  <span className="truncate">qiling.xiong@mail.polimi.it</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Member Card 3 */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4 hover:border-emerald-200 hover:shadow-md transition-all">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg select-none border border-emerald-100 uppercase flex-shrink-0">
+                MS
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-extrabold text-slate-900 whitespace-normal break-words">Muhammad Shahzaib</h4>
+                <p className="text-[11px] font-mono text-slate-400 mt-0.5">Assigned: <span className="font-bold text-emerald-600">PM₁₀ Particulates</span></p>
+                <a href="mailto:muhammad.shahzaib@mail.polimi.it" className="text-xs text-slate-500 flex items-center gap-1 mt-1.5 hover:text-emerald-600 font-sans transition-colors">
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                  <span className="truncate">muhammad.shahzaib@mail.polimi.it</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
