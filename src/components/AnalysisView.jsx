@@ -1145,39 +1145,39 @@ export default function AnalysisView() {
                         <table id="table-pm25-lcc" className="min-w-full text-slate-700 text-xs border-collapse">
                           <thead>
                             <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
-                              <th className="py-2.5 px-3 font-bold">Category</th>
+                              <th className="py-2.5 px-3 font-bold">Category Type</th>
                               <th className="py-2.5 px-3 font-bold text-right">Pixels</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Share (%)</th>
                               <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
-                              <th className="py-2.5 px-3 font-bold text-right">Stability Rate</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr className="border-b border-slate-100 hover:bg-slate-50/50">
                               <td className="py-3 px-3 font-bold flex items-center gap-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
-                                Stable (Crops ➜ Crops)
+                                Stable Crops
                               </td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-600">7,906,220,000</td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-800 font-bold">734,500.0</td>
-                              <td className="py-3 px-3 text-right font-mono text-emerald-600 font-black">93.80%</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">1,949,281,999</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-600 font-extrabold">79.35%</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-800 font-bold">194,928.20</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-emerald-50/10 hover:bg-emerald-50/20 text-emerald-950">
                               <td className="py-3 px-3 font-bold flex items-center gap-1">
                                 <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
-                                Gain (other ➜ Crops)
+                                Gain to Crops
                               </td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-600">320,229,000</td>
-                              <td className="py-3 px-3 text-right font-mono text-emerald-850 font-bold">29,750.0</td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">351,083,907</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-600 font-extrabold font-black">14.29%</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-850 font-bold">35,108.39</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-rose-50/10 hover:bg-rose-50/20 text-rose-950">
                               <td className="py-3 px-3 font-bold flex items-center gap-1">
                                 <ArrowDownRight className="w-3.5 h-3.5 text-rose-600" />
-                                Loss (Crops ➜ other)
+                                Loss from Crops
                               </td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-600">202,254,000</td>
-                              <td className="py-3 px-3 text-right font-mono text-rose-850 font-bold">18,790.0</td>
-                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">156,327,078</td>
+                              <td className="py-3 px-3 text-right font-mono text-rose-600 font-extrabold font-black">6.36%</td>
+                              <td className="py-3 px-3 text-right font-mono text-rose-850 font-bold">15,632.71</td>
                             </tr>
                           </tbody>
                         </table>
@@ -1185,7 +1185,7 @@ export default function AnalysisView() {
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
                       <span>*Source: ESRI 10m Land Cover Database (2021 & 2023)</span>
-                      <span>Total Pixel Count: 8,428,703,000</span>
+                      <span>Total Pixel Count: 2,456,692,984</span>
                     </div>
                   </div>
 
@@ -1204,8 +1204,9 @@ export default function AnalysisView() {
                           <thead>
                             <tr className="border-b border-slate-200 text-slate-455 text-slate-450 text-[10px] font-mono text-left uppercase">
                               <th className="py-2.5 px-3 font-bold">Direction</th>
-                              <th className="py-2.5 px-3 font-bold">Transition</th>
-                              <th className="py-2.5 px-3 font-bold text-right">% of Total</th>
+                              <th className="py-2.5 px-3 font-bold">Transition Class</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Percentage</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Pixel Count</th>
                               <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
                             </tr>
                           </thead>
@@ -1213,40 +1214,46 @@ export default function AnalysisView() {
                             {/* GAINS */}
                             <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-50/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
-                              <td className="py-2 px-3 font-bold text-slate-700">Grassland ➜ Crops</td>
-                              <td className="py-2 px-3 text-right font-mono text-emerald-700 font-black">52.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">15,470.0</td>
+                              <td className="py-2 px-3 font-bold text-slate-700">Rangeland ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700 font-extrabold">94.46%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">331,621,734</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">33,162.17</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
-                              <td className="py-2 px-3 text-slate-600">Shrubland ➜ Crops</td>
-                              <td className="py-2 px-3 text-right font-mono text-emerald-700">30.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">8,925.0</td>
+                              <td className="py-2 px-3 text-slate-650">Built Area ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">3.25%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">11,409,048</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">1,140.90</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
-                              <td className="py-2 px-3 text-slate-650">Bare Area ➜ Crops</td>
-                              <td className="py-2 px-3 text-right font-mono text-emerald-700">18.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800">5,355.0</td>
+                              <td className="py-2 px-3 text-slate-650">Trees ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">1.64%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">5,761,802</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">576.18</td>
                             </tr>
                             {/* LOSSES */}
                             <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-50/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
-                              <td className="py-2 px-3 font-bold text-slate-700">Crops ➜ Built Area</td>
-                              <td className="py-2 px-3 text-right font-mono text-rose-700 font-black">62.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">11,649.8</td>
+                              <td className="py-2 px-3 font-bold text-slate-700">Crops ➜ Rangeland</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700 font-extrabold">76.88%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">120,181,022</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">12,018.10</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
-                              <td className="py-2 px-3 text-slate-650">Crops ➜ Shrubland</td>
-                              <td className="py-2 px-3 text-right font-mono text-rose-700">23.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">4,321.7</td>
+                              <td className="py-2 px-3 text-slate-650 font-medium">Crops ➜ Built Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">13.50%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">21,101,202</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">2,110.12</td>
                             </tr>
                             <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
                               <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
-                              <td className="py-2 px-3 text-slate-650">Crops ➜ Forest/Trees</td>
-                              <td className="py-2 px-3 text-right font-mono text-rose-700">15.00%</td>
-                              <td className="py-2 px-3 text-right font-mono text-slate-800">2,818.5</td>
+                              <td className="py-2 px-3 text-slate-650 font-medium">Crops ➜ Trees</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">8.29%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-600">12,955,178</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">1,295.52</td>
                             </tr>
                           </tbody>
                         </table>
@@ -1287,21 +1294,21 @@ export default function AnalysisView() {
                             <tbody>
                               <tr className="border-b border-slate-100 hover:bg-slate-50/50">
                                 <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 1</td>
-                                <td className="py-3 px-3 font-bold text-slate-700">Stable Trees</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Stable Crops</td>
                                 <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−1.052</td>
                                 <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−15.979</td>
                                 <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+4.182</td>
                               </tr>
                               <tr className="border-b border-slate-100 hover:bg-slate-50/50 flex-row">
                                 <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 2</td>
-                                <td className="py-3 px-3 font-bold text-slate-700">Gain Areas</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Gain to Crops</td>
                                 <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−1.854</td>
                                 <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−7.292</td>
                                 <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+3.725</td>
                               </tr>
                               <tr className="border-b border-slate-100 hover:bg-slate-50/50">
                                 <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 3</td>
-                                <td className="py-3 px-3 font-bold text-slate-700">Loss Areas</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Loss from Crops</td>
                                 <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−0.881</td>
                                 <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−15.979</td>
                                 <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+4.026</td>
@@ -1325,15 +1332,15 @@ export default function AnalysisView() {
                           <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-650 text-slate-600 tracking-wide font-mono select-none">
                             <div className="flex items-center gap-1.5">
                               <span className="w-3 h-3 rounded-full bg-[#D97706]" />
-                              <span>Zone 1 Stable Trees</span>
+                              <span>Zone 1 Stable Crops</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <span className="w-3 h-3 rounded-full bg-[#10B981]" />
-                              <span>Zone 2 Gain Areas</span>
+                              <span>Zone 2 Gain to Crops</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <span className="w-3 h-3 rounded-full bg-[#F59E0B]" />
-                              <span>Zone 3 Loss Areas</span>
+                              <span>Zone 3 Loss from Crops</span>
                             </div>
                           </div>
 
@@ -1505,9 +1512,9 @@ export default function AnalysisView() {
                             <tbody>
                               <tr className="border-b border-slate-100 hover:bg-slate-50/50">
                                 <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 1 (Lowest Exposure)</td>
-                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">2,860</td>
+                                <td className="py-3.5 px-4 text-center font-mono text-slate-600">0</td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className="inline-block bg-[#E6F4EA] text-[#137333] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">0.003%</span>
+                                  <span className="inline-block bg-[#E6F4EA] text-[#137333] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">0.00%</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Pristine, unpopulated high-altitude/remote zones</td>
                               </tr>
@@ -1515,7 +1522,7 @@ export default function AnalysisView() {
                                 <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 2</td>
                                 <td className="py-3.5 px-4 text-center font-mono text-slate-600">2,390,748</td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className="inline-block bg-[#EBF5FB] text-[#2980B9] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">2.85%</span>
+                                  <span className="inline-block bg-[#EBF5FB] text-[#2980B9] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">2.80%</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Low-density rural or protected regions</td>
                               </tr>
@@ -1523,7 +1530,7 @@ export default function AnalysisView() {
                                 <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 3</td>
                                 <td className="py-3.5 px-4 text-center font-mono text-slate-600">63,658,511</td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className="inline-block bg-[#FEF9E7] text-[#D4AC0D] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">75.84%</span>
+                                  <span className="inline-block bg-[#FEF9E7] text-[#D4AC0D] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">74.51%</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Primary baseline: Major urban centers and plains</td>
                               </tr>
@@ -1531,7 +1538,7 @@ export default function AnalysisView() {
                                 <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 4</td>
                                 <td className="py-3.5 px-4 text-center font-mono text-slate-600">15,401,816</td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className="inline-block bg-[#FDEDEC] text-[#C0392B] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">18.35%</span>
+                                  <span className="inline-block bg-[#FDEDEC] text-[#C0392B] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">18.03%</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">High-density urban and industrial corridors</td>
                               </tr>
@@ -1539,13 +1546,13 @@ export default function AnalysisView() {
                                 <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 5 (Highest Exposure)</td>
                                 <td className="py-3.5 px-4 text-center font-mono text-slate-600">3,982,586</td>
                                 <td className="py-3.5 px-4 text-center">
-                                  <span className="inline-block bg-[#F5EEF8] text-[#8E44AD] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">4.75%</span>
+                                  <span className="inline-block bg-[#F5EEF8] text-[#8E44AD] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">4.66%</span>
                                 </td>
                                 <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Severe particulate hot spots / valley cities</td>
                               </tr>
                               <tr className="border-t-2 border-slate-350 font-extrabold bg-slate-50/65">
                                 <td className="py-4 px-4 uppercase tracking-wider text-slate-900 rounded-bl-lg">Total Captured</td>
-                                <td className="py-4 px-4 text-center font-mono text-slate-900">85,436,521</td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-900">85,433,661</td>
                                 <td className="py-4 px-4 text-center">
                                   <span className="inline-block bg-slate-200 text-slate-700 font-extrabold text-[11px] px-3.5 py-1 rounded-full font-mono">100%</span>
                                 </td>
@@ -1561,11 +1568,11 @@ export default function AnalysisView() {
                             <PieChart>
                               <Pie
                                 data={[
-                                  { category: 'Class 1', value: 0.003, color: '#10B981' },
-                                  { category: 'Class 2', value: 2.85, color: '#3182CE' },
-                                  { category: 'Class 3', value: 75.84, color: '#DD6B20' },
-                                  { category: 'Class 4', value: 18.35, color: '#E53E3E' },
-                                  { category: 'Class 5', value: 4.75, color: '#805AD5' }
+                                  { category: 'Class 1', value: 0.00, color: '#10B981' },
+                                  { category: 'Class 2', value: 2.80, color: '#3182CE' },
+                                  { category: 'Class 3', value: 74.51, color: '#DD6B20' },
+                                  { category: 'Class 4', value: 18.03, color: '#E53E3E' },
+                                  { category: 'Class 5', value: 4.66, color: '#805AD5' }
                                 ]}
                                 cx="50%"
                                 cy="50%"
@@ -1615,16 +1622,16 @@ export default function AnalysisView() {
                   </div>
                   <div className="text-slate-650 text-slate-600 text-[13px] leading-relaxed font-sans space-y-3">
                     <p>
-                      <strong className="text-amber-955 font-extrabold text-amber-900">Vegetation as a Sink:</strong> Unlike NO₂, PM₂.₅ concentrations decreased across all three zones. Crucially, Gain Areas (Zone 2) experienced the most pronounced drop (<strong className="text-slate-950 font-extrabold font-black">−1.854 µg/m³</strong>). This strongly validates the ecological hypothesis that expanding canopy covers act as efficient physical sinks, intercepting and capturing fine particulate matter more effectively than stable or degrading zones.
+                      <strong className="text-amber-955 font-extrabold text-amber-900">Cropland Dynamics and Zonal Trends:</strong> Unlike NO₂, PM₂.₅ concentrations decreased across all three zones. Crucially, Gain Areas (Zone 2) experienced the most pronounced drop (<strong className="text-slate-950 font-extrabold font-black">−1.854 µg/m³</strong>). This validates the geographic observations that newly developed cropland zones or agricultural expansions correlate with significant regional microclimate changes and PM₂.₅ reductions of up to 1.85 µg/m³.
                     </p>
                     <p>
-                      <strong className="text-amber-955 font-extrabold text-amber-900">The Bell-Curve Distribution:</strong> PM₂.₅ exposure displays a healthy, roughly normal distribution curve centered squarely on Class 3 (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">75.84%</strong>), with a heavy skew toward higher exposure (Class 4 & 5 combining for over <strong className="text-slate-955 font-extrabold text-slate-900 font-black">23%</strong>). This is wildly different from NO₂, which was critically trapped at 99.94% in just a single class.
+                      <strong className="text-amber-955 font-extrabold text-amber-900 font-extrabold text-amber-900">The Bell-Curve Distribution:</strong> PM₂.₅ exposure displays a healthy, roughly normal distribution curve centered squarely on Class 3 (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">74.51%</strong>), with a heavy skew toward higher exposure (Class 4 & 5 combining for over <strong className="text-slate-955 font-extrabold text-slate-900 font-black">22%</strong>). This is wildly different from NO₂, which was critically trapped at 99.94% in just a single class.
                     </p>
                     <p>
-                      <strong className="text-amber-955 font-extrabold text-amber-900">Full Extent Capture:</strong> The total population footprint here (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">~85.4M</strong>) reflects a complete national dataset, matching Turkey's full census expectations far better than the restricted, clipped NO₂ boundary footprint.
+                      <strong className="text-amber-955 font-extrabold text-amber-900 font-extrabold text-amber-900">Full Extent Capture:</strong> The total population footprint here (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">~85.4M</strong>) reflects a complete national dataset, matching Turkey's full census expectations far better than the restricted, clipped NO₂ boundary footprint.
                     </p>
                     <div className="text-[10px] text-slate-500 font-mono mt-2 pt-2 border-t border-slate-200/50 leading-relaxed font-normal">
-                      <span className="font-bold text-slate-900">Border Effect Observation:</span> The identical minimum values (<strong className="text-slate-955 font-extrabold text-slate-900">−15.979 µg/m³</strong>) shared by Zone 1 and Zone 3 suggest a massive regional PM₂.₅ reduction localized along a shared geographic border between stable forest boundaries and deforested edge zones.
+                      <span className="font-bold text-slate-900">Border Effect Observation:</span> The identical minimum values (<strong className="text-slate-955 font-extrabold text-slate-900">−15.979 µg/m³</strong>) shared by Zone 1 and Zone 3 suggest a massive regional PM₂.₅ reduction localized along a shared geographic border between stable crop boundaries and transition edge zones.
                     </div>
                   </div>
                   <div className="text-[10px] text-slate-450 font-mono mt-2 pt-3 border-t border-slate-250/50 border-slate-200 leading-relaxed select-text">
