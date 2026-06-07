@@ -12,8 +12,8 @@ export default function App() {
   // Nav configuration
   const navItems = [
     { key: 'home', label: 'Home', icon: Globe },
-    { key: 'analysis', label: 'Analysis & Methodology', icon: BookOpen },
-    { key: 'webgis', label: 'WebGIS Interactive Map', icon: Map },
+    { key: 'analysis', label: 'Analysis', icon: BookOpen },
+    { key: 'webgis', label: 'WebGIS Map', icon: Map },
   ];
 
   const handleNavigate = (view) => {

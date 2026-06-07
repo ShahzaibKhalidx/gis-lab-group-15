@@ -1,11 +1,11 @@
 import { motion } from 'motion/react';
 import { Wind, Cloud, Zap, ShieldAlert, Database, MapPin, ArrowRight, Table, Users, Mail, GraduationCap } from 'lucide-react';
-import turkeySatellite from '../assets/images/turkey_satellite_1780705843222.png';
+import turkeySatellite from '../assets/images/banner.png';
 
 export default function HomeView({ onNavigate }) {
   return (
     <div className="bg-slate-50 min-h-screen text-slate-900 pb-20 select-none">
-      
+
       {/* ─── HERO BANNER SECTION ─── */}
       <div id="hero-banner" className="relative h-screen flex flex-col justify-center items-center overflow-hidden">
         {/* Background Image with Dark Gradient Overlay */}
@@ -39,17 +39,20 @@ export default function HomeView({ onNavigate }) {
             id="main-title"
             className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight uppercase font-sans"
           >
-            Mapping Air Quality <br />
-            <span className="text-emerald-400 bg-clip-text">Change in Turkey</span>
+            Air Quality & Land Cover Change
+            <br />
+            <span className="text-emerald-400 bg-clip-text">Turkey 2021–2023</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-slate-250 mt-6 text-base md:text-lg max-w-2xl leading-relaxed font-sans font-medium"
+            className="text-white mt-6 text-base md:text-lg max-w-2xl leading-relaxed font-sans font-medium"
           >
-            Cross-referencing multitemporal ESRI 10-meter Deep Learning Land Cover with key ambient concentrations (NO₂, PM₁₀, and PM₂.₅) to evaluate environmental exposure.
+            A geospatial analysis of (NO₂, PM₁₀, and PM₂.₅)
+            concentrations combined with land cover change
+            detection, CAMS and WorldPop data.
           </motion.p>
 
           <motion.div
@@ -63,7 +66,7 @@ export default function HomeView({ onNavigate }) {
               onClick={() => onNavigate('webgis')}
               className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg hover:shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm font-mono tracking-wider uppercase"
             >
-              Explore WebGIS Map
+              Explore the Map
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <button
@@ -97,7 +100,7 @@ export default function HomeView({ onNavigate }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
+
           {/* Card NO2 */}
           <div
             id="card-no2"
@@ -171,7 +174,7 @@ export default function HomeView({ onNavigate }) {
       <div id="key-findings-section" className="bg-slate-950 text-white py-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
+
             <div>
               <span className="text-xs font-mono font-black tracking-widest text-emerald-400 uppercase">
                 Zonal Statistics Findings
@@ -202,7 +205,7 @@ export default function HomeView({ onNavigate }) {
             </div>
 
             <div className="space-y-6">
-              
+
               <div className="bg-slate-900/50 p-6 border border-slate-850 rounded-2xl flex gap-5 items-start">
                 <div className="p-3 bg-red-500/10 text-red-400 rounded-xl">
                   <ShieldAlert className="w-5 h-5" />
@@ -240,7 +243,7 @@ export default function HomeView({ onNavigate }) {
               </div>
 
             </div>
-            
+
           </div>
         </div>
       </div>
@@ -258,7 +261,7 @@ export default function HomeView({ onNavigate }) {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col hover:border-emerald-300 hover:shadow-md transition-all">
             <div className="mb-4 text-emerald-600">
               <Database className="w-7 h-7" />
@@ -322,7 +325,7 @@ export default function HomeView({ onNavigate }) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            
+
             {/* Member Card 1 */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4 hover:border-emerald-200 hover:shadow-md transition-all">
               <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg select-none border border-blue-100 uppercase flex-shrink-0">
