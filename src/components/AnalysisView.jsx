@@ -5,50 +5,6 @@ import { HelpCircle, Table, ArrowUpRight, ArrowDownRight, Award, Library, Info, 
 import { methodologyData } from '../data/methodologyData';
 
 export default function AnalysisView() {
-  const [bivariateHover, setBivariateHover] = useState(null);
-
-  // 5x5 Bivariate color palette (mixing density [Y-axis] and pollution change [X-axis])
-  // Density: 1 (Low) to 5 (High)
-  // Pollution: 1 (Low) to 5 (High)
-  const getBivariateColor = (x, y) => {
-    const matrix = [
-      ['#e8e8e8', '#dfd0d6', '#d6b8c4', '#cc9fb2', '#c387a0'], // y=1: Low Density
-      ['#cbdad5', '#c3c3cc', '#bbc0be', '#b29bb0', '#aa84a2'], // y=2
-      ['#aed2c3', '#a6bbc2', '#9ea4c1', '#95889d', '#8d6d9c'], // y=3
-      ['#91caae', '#89b3ab', '#829ca8', '#7b848a', '#724f8d'], // y=4
-      ['#74c299', '#6cbca9', '#64969f', '#5c6c94', '#534789']  // y=5: High Density
-    ];
-    return matrix[y - 1]?.[x - 1] || '#e8e8e8';
-  };
-
-  const getBivariateDescription = (x, y) => {
-    const popLabel = ['Extremely Sparse', 'Low Density', 'Moderate Suburban', 'High Urban', 'Dense Metropolitan'][y - 1];
-    const pollLabel = ['Decreasing/Stable', 'Negligible Increase', 'Moderate Increase', 'Significant Increase', 'Severe Spikes'][x - 1];
-    
-    let priority = 'Low Priority Alert';
-    let textTheme = 'text-green-650 bg-green-50 text-green-700 bg-green-100/60';
-    if (x >= 4 && y >= 4) {
-      priority = 'CRITICAL ENVIRONMENTAL JUSTICE HOTSPOT';
-      textTheme = 'text-red-700 bg-red-100 animate-pulse';
-    } else if (x >= 3 && y >= 3) {
-      priority = 'Elevated Risk / Mitigation Zone';
-      textTheme = 'text-amber-700 bg-amber-100/70';
-    } else if (y >= 4) {
-      priority = 'High Population / Maintained Quality';
-      textTheme = 'text-sky-705 text-sky-700 bg-sky-100/65';
-    } else if (x >= 4) {
-      priority = 'High Pollution / Sparse Impact';
-      textTheme = 'text-orange-705 text-orange-700 bg-orange-100/65';
-    }
-
-    return {
-      popLabel,
-      pollLabel,
-      priority,
-      textTheme
-    };
-  };
-
   return (
     <div className="bg-slate-50 min-h-screen text-slate-900 pb-20 select-none">
       
@@ -318,29 +274,167 @@ export default function AnalysisView() {
                           </table>
                         </div>
 
-                        {/* Beautiful synchronized bar chart for zonal stats */}
-                        <div className="bg-slate-50/40 p-4 border border-slate-150 rounded-xl h-56">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                              data={[
-                                { zone: 'Stable Trees', mean: -3.311, min: -20.472, max: 8.240 },
-                                { zone: 'Gain Areas', mean: -4.173, min: -11.986, max: 6.054 },
-                                { zone: 'Loss Areas', mean: -3.081, min: -10.568, max: 6.054 }
-                              ]}
-                              margin={{ top: 10, right: 10, left: -20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                              <XAxis dataKey="zone" tickLine={false} tick={{ fill: '#64748B', fontSize: 9, fontWeight: 'bold', fontFamily: 'monospace' }} />
-                              <YAxis tickLine={false} tick={{ fill: '#64748B', fontSize: 9, fontWeight: 'bold', fontFamily: 'monospace' }} />
-                              <ChartTooltip
-                                contentStyle={{ background: '#0F172A', color: 'white', borderRadius: '8px', border: 'none', fontSize: '11px' }}
-                              />
-                              <ChartLegend iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase' }} />
-                              <Bar dataKey="mean" name="Mean Change" fill="#10B981" radius={[4, 4, 0, 0]} barSize={12} />
-                              <Bar dataKey="max" name="Max Spike" fill="#EF4444" radius={[4, 4, 0, 0]} barSize={12} />
-                              <Bar dataKey="min" name="Min Improvement" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={12} />
-                            </BarChart>
-                          </ResponsiveContainer>
+                        {/* Beautiful segmented horizontal progress charts for zonal stats */}
+                        <div className="bg-slate-50/45 p-6 border border-slate-200/65 rounded-2xl flex flex-col gap-6">
+                          <div>
+                            <h4 className="text-[13px] font-extrabold text-[#1a365d] tracking-tight flex items-center gap-1.5 font-sans">
+                              PM₁₀ Concentration Change by Land Cover Zone
+                            </h4>
+                            <p className="text-[11px] text-slate-500 mt-1 leading-snug font-medium">
+                              Annual Mean Aggregation Change 2021–2023 · negative = improvement (reduction in PM₁₀)
+                            </p>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-600 tracking-wide font-mono select-none">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#149596]" />
+                              <span>Zone 1 Stable</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#2c9d45]" />
+                              <span>Zone 2 Gain</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#f0ab00]" />
+                              <span>Zone 3 Loss</span>
+                            </div>
+                          </div>
+
+                          {/* 1. MEAN PM10 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Mean PM₁₀ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  {/* Center line for Zero */}
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#149596] rounded-l-xs"
+                                    style={{ width: `${(3.311 / 5.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#149596]">-3.311</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#2c9d45] rounded-l-xs"
+                                    style={{ width: `${(4.173 / 5.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#2c9d45]">-4.173</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#f0ab00] rounded-l-xs"
+                                    style={{ width: `${(3.081 / 5.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#f0ab00]">-3.081</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2. MIN PM10 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Min PM₁₀ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#149596]/80 rounded-r-xs"
+                                    style={{ width: `${(20.472 / 22.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-20.472</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#2c9d45]/80 rounded-r-xs"
+                                    style={{ width: `${(11.986 / 22.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-11.986</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#f0ab00]/80 rounded-r-xs"
+                                    style={{ width: `${(10.568 / 22.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-10.568</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. MAX PM10 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Max PM₁₀ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#149596]/60 rounded-r-xs"
+                                    style={{ width: `${(8.240 / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+8.240</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#2c9d45]/60 rounded-r-xs"
+                                    style={{ width: `${(6.054 / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+6.054</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#f0ab00]/65 rounded-r-xs"
+                                    style={{ width: `${(6.054 / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+6.054</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Image-Style Note */}
+                          <p className="text-[10px] text-slate-450 leading-relaxed pt-3 border-t border-slate-200/55 font-sans">
+                            <span className="font-bold">Note:</span> All values in µg/m³ · Negative values indicate PM₁₀ reduction (improvement) between 2021 and 2023 · Positive values indicate increase (worsening) · Source: CAMS Reanalysis PM₁₀ Annual Mean Aggregation Change · Land cover zones derived from ESRI 10m Annual Land Cover
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -362,67 +456,78 @@ export default function AnalysisView() {
                       </div>
                       
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                        <div className="overflow-x-auto lg:col-span-7">
+                        <div className="overflow-x-auto lg:col-span-8">
                           <table className="min-w-full text-slate-700 text-xs border-collapse">
                             <thead>
-                              <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
-                                <th className="py-2.5 px-3 font-bold">PM₁₀ Class</th>
-                                <th className="py-2.5 px-3 font-bold text-right">Population</th>
-                                <th className="py-2.5 px-3 font-bold text-right">% of Total</th>
+                              <tr className="bg-[#1E5785] text-white text-[10px] font-mono uppercase tracking-wider">
+                                <th className="py-3 px-4 font-bold text-left rounded-l-lg">POLLUTION CLASS</th>
+                                <th className="py-3 px-4 font-bold text-center">PM₁₀ RANGE</th>
+                                <th className="py-3 px-4 font-bold text-right">POPULATION</th>
+                                <th className="py-3 px-4 font-bold text-center">SHARE (%)</th>
+                                <th className="py-3 px-4 font-bold text-center rounded-r-lg">EU LEVEL</th>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr className="border-b border-slate-100 bg-[#E8F8F5]/10 hover:bg-emerald-50/20">
-                                <td className="py-2.5 px-3 font-medium flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]"></span>
-                                  Class 1 (lowest)
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 1</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-600">≤ 15 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">1,627,874</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#E6F4EA] text-[#137333] font-black text-[11px] px-3.5 py-1 rounded-full font-mono">1.91%</span>
                                 </td>
-                                <td className="py-2.5 px-3 text-right font-mono text-slate-600">1,627,874</td>
-                                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">1.91%</td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500">Very Good</td>
                               </tr>
-                              <tr className="border-b border-slate-100 bg-[#EBF5FB]/10 hover:bg-blue-50/20">
-                                <td className="py-2.5 px-3 font-medium flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-[#3B82F6]"></span>
-                                  Class 2
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 2</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-600">15–31 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">56,779,403</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#EBF5FB] text-[#2980B9] font-black text-[11px] px-3.5 py-1 rounded-full font-mono">66.46%</span>
                                 </td>
-                                <td className="py-2.5 px-3 text-right font-mono text-slate-600">56,779,403</td>
-                                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">66.46%</td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500">Good</td>
                               </tr>
-                              <tr className="border-b border-slate-100 bg-[#FEF9E7]/10 hover:bg-amber-50/20">
-                                <td className="py-2.5 px-3 font-medium flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
-                                  Class 3
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 3</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-600">31–40 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">22,461,078</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#FEF9E7] text-[#D4AC0D] font-black text-[11px] px-3.5 py-1 rounded-full font-mono">26.29%</span>
                                 </td>
-                                <td className="py-2.5 px-3 text-right font-mono text-slate-600">22,461,078</td>
-                                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">26.29%</td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500">Moderate</td>
                               </tr>
-                              <tr className="border-b border-slate-100 bg-[#FDEDEC]/10 hover:bg-red-50/20">
-                                <td className="py-2.5 px-3 font-medium flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span>
-                                  Class 4
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 4</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-600">40–50 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">3,767,660</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#FDEDEC] text-[#C0392B] font-black text-[11px] px-3.5 py-1 rounded-full font-mono">4.41%</span>
                                 </td>
-                                <td className="py-2.5 px-3 text-right font-mono text-slate-600">3,767,660</td>
-                                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">4.41%</td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500">Poor</td>
                               </tr>
-                              <tr className="border-b border-slate-100 bg-[#F5EEF8]/10 hover:bg-purple-50/20">
-                                <td className="py-2.5 px-3 font-medium flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-full bg-[#8E44AD]"></span>
-                                  Class 5 (highest)
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-950 text-slate-900">Class 5</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-600">&gt; 50 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">800,506</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#F5EEF8] text-[#8E44AD] font-black text-[11px] px-3.5 py-1 rounded-full font-mono">0.94%</span>
                                 </td>
-                                <td className="py-2.5 px-3 text-right font-mono text-slate-600">800,506</td>
-                                <td className="py-2.5 px-3 text-right font-mono font-bold text-slate-800">0.94%</td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500">Very Poor</td>
                               </tr>
-                              <tr className="border-t-2 border-slate-300 font-extrabold bg-slate-100">
-                                <td className="py-3 px-3 uppercase tracking-wider text-slate-850">Total</td>
-                                <td className="py-3 px-3 text-right font-mono text-slate-850">85,436,521</td>
-                                <td className="py-3 px-3 text-right font-mono text-slate-850">100.00%</td>
+                              <tr className="border-t-2 border-slate-350 font-extrabold bg-slate-50/65">
+                                <td className="py-4 px-4 uppercase tracking-wider text-slate-900 rounded-bl-lg">Total</td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-400">—</td>
+                                <td className="py-4 px-4 text-right font-mono text-slate-900">85,436,522</td>
+                                <td className="py-4 px-4 text-center">
+                                  <span className="inline-block bg-slate-250 bg-slate-200 text-slate-705 text-slate-700 font-extrabold text-[11px] px-3.5 py-1 rounded-full font-mono">100%</span>
+                                </td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-400 rounded-br-lg">—</td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
 
                         {/* Beautiful synchronized pie chart for demographics */}
-                        <div className="lg:col-span-5 h-56 relative flex items-center justify-center">
+                        <div className="lg:col-span-4 h-56 relative flex items-center justify-center">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -469,6 +574,1062 @@ export default function AnalysisView() {
                     </div>
                   </div>
 
+                </div>
+
+                {/* Key Findings — Turkey PM10 Exposure 2023 */}
+                <div className="mt-8 p-6 bg-[#F0F7FF] border border-blue-200/60 rounded-2xl shadow-xs text-slate-800 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔍</span>
+                    <h4 className="font-extrabold text-[#235D8C] text-sm font-sans tracking-wide">
+                      Key Findings — Turkey PM₁₀ Exposure 2023
+                    </h4>
+                  </div>
+                  <p className="text-slate-600 text-[13px] leading-relaxed font-sans">
+                    The majority of Turkey's population (<strong className="text-slate-900 font-extrabold">66.46%, ~56.8M people</strong>) lives in areas classified as <strong className="text-slate-900 font-extrabold">Good</strong> (PM₁₀ 15–31 µg/m³), below the EU annual limit of 40 µg/m³. A significant portion (<strong className="text-slate-900 font-extrabold">26.29%, ~22.5M</strong>) experiences <strong className="text-slate-900 font-extrabold">Moderate</strong> levels (31–40 µg/m³), concentrated in central Anatolia and industrial zones. Approximately <strong className="text-slate-900 font-extrabold">5.35% (~4.57M people</strong>) are exposed to Poor or Very Poor air quality exceeding the EU limit value of 40 µg/m³ — primarily in eastern Turkey and major urban centres such as Istanbul, Ankara and Izmir where both population density and particulate concentrations peak.
+                  </p>
+                  <div className="text-[10px] text-slate-400 font-mono mt-2 pt-2 border-t border-slate-200/50 leading-relaxed">
+                    Source: WorldPop 100m Population Counts (Unconstrained) 2023 · CAMS Reanalysis PM₁₀ Concentration Map 2023 · FAO GAUL Level 2 Administrative Boundaries · EU Annual Limit Value: PM₁₀ = 40 µg/m³
+                  </div>
+                </div>
+
+                {index < 2 && <hr className="border-slate-200 mt-20" />}
+              </div>
+            );
+          }
+
+          if (key === 'no2') {
+            return (
+              <div key={key} id={`section-${key}`} className="scroll-mt-36 mb-24">
+                
+                {/* NO2 Pollutant Heading */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-3.5 h-3.5 rounded-full ${item.colorTheme.primary}`}></span>
+                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-950 font-sans">{item.title}</h2>
+                    </div>
+                    <p className="text-slate-500 text-sm mt-1 max-w-2xl font-medium">{item.description}</p>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white px-4 py-2.5 border border-slate-200/80 rounded-xl text-xs font-mono select-none shadow-xs">
+                    <span className="text-slate-550">Correlated Index:</span>
+                    <span className={`font-black ${item.colorTheme.text}`}>{item.associatedLandCover} (Code {item.landCoverCode})</span>
+                  </div>
+                </div>
+
+                {/* ─── CUSTOM 4 LAB TABLES GRID ─── */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 my-8">
+                  
+                  {/* Table 1 — Land Cover Change Statistics for Built Areas (Lab 3, Step 5) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-slate-850 uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Table className="w-4 h-4 text-emerald-600" />
+                          Table 1 — Land Cover Change Statistics for Built Areas (Lab 3, Step 5)
+                        </h4>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono font-bold px-2.5 py-0.5 rounded border border-emerald-100">Lab 3</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-slate-700 text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
+                              <th className="py-2.5 px-3 font-bold">Category</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Pixels</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Stability Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                                Stable (Built ➜ Built)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">7,208,310,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-800 font-bold">669,960.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-600 font-black">85.50%</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/10 hover:bg-emerald-50/20 text-emerald-950">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                                Gain (other ➜ Built)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">943,590,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-800 font-bold">87,700.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/10 hover:bg-rose-50/20 text-rose-950">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <ArrowDownRight className="w-3.5 h-3.5 text-rose-600" />
+                                Loss (Built ➜ other)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">278,020,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-rose-850 font-bold">25,840.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Source: ESRI 10m Land Cover Database (2021 & 2023)</span>
+                      <span>Total Pixel Count: 8,429,920,000</span>
+                    </div>
+                  </div>
+
+                  {/* Table 2 — Top Gain/Loss Transitions for Built (Lab 3, Step 5) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-[#1E5785] uppercase tracking-wider font-mono flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-[#2980B9]" />
+                          Table 2 — Top Gain/Loss Transitions for Built Areas (Lab 3, Step 5)
+                        </h4>
+                        <span className="text-[10px] bg-[#EBF5FB] text-[#2980B9] font-mono font-bold px-2.5 py-0.5 rounded border border-blue-100">Lab 3</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-slate-700 text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
+                              <th className="py-2.5 px-3 font-bold">Direction</th>
+                              <th className="py-2.5 px-3 font-bold">Transition</th>
+                              <th className="py-2.5 px-3 font-bold text-right">% of Total</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {/* GAINS */}
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-50/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 font-bold text-slate-700">Crops ➜ Built Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700 font-black">48.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">42,096.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 text-slate-650">Shrubland ➜ Built Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">32.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">28,064.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 text-slate-650">Grassland ➜ Built Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">20.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">17,540.0</td>
+                            </tr>
+                            {/* LOSSES */}
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-50/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 font-bold text-slate-705">Built Area ➜ Grassland</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700 font-black">45.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">11,628.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 text-slate-650">Built Area ➜ Bare Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">35.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">9,044.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 text-slate-650">Built Area ➜ Water Bodies</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">20.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">5,168.0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Primary development and urban expansion drivers categorized</span>
+                      <span className="font-bold text-slate-500">MAPPING TRANSITIONS</span>
+                    </div>
+                  </div>
+
+                  {/* Table 3 — NO₂ Zonal Statistics by Land Cover Zone (Lab 3, Step 6) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-1 xl:col-span-2 font-sans">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-xs font-black text-slate-850 uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Table className="w-4 h-4 text-emerald-600" />
+                          Table 3 — NO₂ Zonal Statistics by Land Cover Zone (Lab 3, Step 6)
+                        </h4>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono font-bold px-2.5 py-0.5 rounded border border-emerald-100">Lab 3</span>
+                      </div>
+                      <p className="text-slate-450 text-[10px] uppercase font-mono tracking-wider mb-4 font-bold">
+                        Note: Values represent absolute change in NO₂ levels across different forest/vegetation dynamics over the 2021–2023 period (annual aggregates)
+                      </p>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full text-slate-700 text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
+                                <th className="py-2.5 px-3 font-bold">Zone</th>
+                                <th className="py-2.5 px-3 font-bold">LCC Zone Description</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Mean (µg/m³)</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Min (µg/m³)</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Max (µg/m³)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 1</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Stable Trees</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-extrabold">+0.263</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">-8.287</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+10.392</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 2</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Gain Areas</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-extrabold">+0.422</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">-6.624</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+8.555</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 3</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Loss Areas</td>
+                                <td className="py-3 px-3 text-right font-mono text-emerald-700 font-extrabold">-0.251</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">-3.766</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+2.255</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Beautiful segmented horizontal progress charts for zonal stats */}
+                        <div className="bg-slate-50/45 p-6 border border-slate-200/65 rounded-2xl flex flex-col gap-6">
+                          <div>
+                            <h4 className="text-[13px] font-extrabold text-[#1a365d] tracking-tight flex items-center gap-1.5 font-sans uppercase">
+                              NO₂ Concentration Change by Land Cover Zone
+                            </h4>
+                            <p className="text-[11px] text-slate-500 mt-1 leading-snug font-medium">
+                              Annual Mean Aggregation Change 2021–2023 · negative = reduction (improvement in NO₂)
+                            </p>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-600 tracking-wide font-mono select-none uppercase">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#149596]" />
+                              <span>Zone 1 Stable</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#2c9d45]" />
+                              <span>Zone 2 Gain</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#f0ab00]" />
+                              <span>Zone 3 Loss</span>
+                            </div>
+                          </div>
+
+                          {/* 1. MEAN NO2 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-550 text-slate-500 font-mono">
+                              Mean NO₂ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  {/* Center line for Zero */}
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-1/2 bg-[#149596] rounded-r-xs"
+                                    style={{ width: `${(0.263 / 1.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-extrabold text-red-655 text-red-600">+0.263</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-1/2 bg-[#2c9d45] rounded-r-xs"
+                                    style={{ width: `${(0.422 / 1.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-extrabold text-red-655 text-red-600">+0.422</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#f0ab00] rounded-l-xs"
+                                    style={{ width: `${(0.251 / 1.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-extrabold text-emerald-600">-0.251</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2. MIN NO2 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Min NO₂ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#149596]/85 rounded-r-xs"
+                                    style={{ width: `${(Math.abs(-8.287) / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-blue-600 font-extrabold">-8.287</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#2c9d45]/85 rounded-r-xs"
+                                    style={{ width: `${(Math.abs(-6.624) / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-blue-600 font-extrabold">-6.624</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#f0ab00]/85 rounded-r-xs"
+                                    style={{ width: `${(Math.abs(-3.766) / 10.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-blue-600 font-extrabold">-3.766</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. MAX NO2 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Max NO₂ Spike (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#149596]/65 rounded-r-xs"
+                                    style={{ width: `${(10.392 / 12.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-red-655 text-red-600">+10.392</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#2c9d45]/65 rounded-r-xs"
+                                    style={{ width: `${(8.555 / 12.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-red-655 text-red-600">+8.555</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#f0ab00]/70 rounded-r-xs"
+                                    style={{ width: `${(2.255 / 12.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-red-655 text-red-600">+2.255</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footnote */}
+                          <p className="text-[10.5px] text-slate-450 leading-relaxed pt-3 border-t border-slate-200/55 font-sans">
+                            <span className="font-bold">Note:</span> All values in µg/m³ · Negative values indicates reduction (improvement) in NO₂ between 2021 and 2023 · Positive values indicates increase (worsening) · Derived from CAMS Reanalysis NO₂ absolute curves.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*LCC = Land Cover Change, AMAC is Average Annual Concentration difference</span>
+                      <span className="font-bold text-slate-500">ZONAL STATISTICS</span>
+                    </div>
+                  </div>
+
+                  {/* Table 4 — Population Exposure by NO₂ Class (Lab 4, Step 8) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-1 xl:col-span-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-[#1E5785] uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#2980B9]" />
+                          Table 4 — Population Exposure by NO₂ Classification (Lab 4, Step 8)
+                        </h4>
+                        <span className="text-[10px] bg-[#EBF5FB] text-[#2980B9] font-mono font-bold px-2.5 py-0.5 rounded border border-blue-100">Lab 4</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <div className="overflow-x-auto lg:col-span-8">
+                          <table className="min-w-full text-slate-700 text-xs border-collapse">
+                            <thead>
+                              <tr className="bg-[#1E5785] text-white text-[10px] font-mono uppercase tracking-wider">
+                                <th className="py-3 px-4 font-bold text-left rounded-l-lg">POLLUTION CLASS</th>
+                                <th className="py-3 px-4 font-bold text-center">NO₂ RANGE</th>
+                                <th className="py-3 px-4 font-bold text-right">POPULATION</th>
+                                <th className="py-3 px-4 font-bold text-center">SHARE (%)</th>
+                                <th className="py-3 px-4 font-bold text-center rounded-r-lg font-sans">SPATIAL CONTEXT</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 1 (Lowest Exposure)</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-650">≤ 10 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">26,376</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#E6F4EA] text-[#137333] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">0.03%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Highly isolated/unpopulated pockets</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50 select-text">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 2</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-650">10–20 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">68,830,788</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#EBF5FB] text-[#2980B9] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">99.94%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Massive nationwide distribution cluster</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 3 (Highest Exposure)</td>
+                                <td className="py-3.5 px-4 text-center font-mono font-medium text-slate-650">&gt; 20 µg/m³</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">4,312</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#FEF9E7] text-[#D4AC0D] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">0.01%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Extreme, localized urban/industrial hot spots</td>
+                              </tr>
+                              <tr className="border-t-2 border-slate-350 font-extrabold bg-slate-50/65">
+                                <td className="py-4 px-4 uppercase tracking-wider text-slate-900 rounded-bl-lg">Total Captured</td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-400">—</td>
+                                <td className="py-4 px-4 text-right font-mono text-slate-900">68,861,476</td>
+                                <td className="py-4 px-4 text-center">
+                                  <span className="inline-block bg-slate-200 text-slate-700 font-extrabold text-[11px] px-3.5 py-1 rounded-full font-mono">100%</span>
+                                </td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-400 rounded-br-lg">—</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Demographics Pie Chart Panel */}
+                        <div className="lg:col-span-4 h-56 relative flex items-center justify-center">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { category: 'Class 1', value: 0.03, color: '#10B981' },
+                                  { category: 'Class 2', value: 99.94, color: '#3B82F6' },
+                                  { category: 'Class 3', value: 0.01, color: '#F59E0B' }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={55}
+                                outerRadius={75}
+                                paddingAngle={3}
+                                dataKey="value"
+                                nameKey="category"
+                              >
+                                {[
+                                  { color: '#10B981' },
+                                  { color: '#3B82F6' },
+                                  { color: '#F59E0B' }
+                                ].map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <ChartTooltip
+                                contentStyle={{ background: '#0F172A', color: 'white', borderRadius: '8px', border: 'none', fontSize: '11px' }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          
+                          {/* Central read-out */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+                            <span className="text-xl font-black text-slate-900 font-mono">Total</span>
+                            <span className="text-[8px] text-slate-500 font-extrabold uppercase tracking-widest leading-none">68.9M Population</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Source: WorldPop 100m Counts · CAMS Reanalysis NO₂ Concentration</span>
+                      <span>ENV JUSTICE MATRIX</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Key Findings — Turkey NO₂ Exposure 2023 */}
+                <div className="mt-8 p-6 bg-[#ECFDF5] border border-emerald-200/65 rounded-2xl border-l-4 border-l-emerald-500 shadow-xs text-slate-800 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔍</span>
+                    <h4 className="font-extrabold text-emerald-800 text-sm font-sans tracking-wide">
+                      Key Findings — Turkey NO₂ Exposure 2023
+                    </h4>
+                  </div>
+                  <div className="text-slate-650 text-slate-600 text-[13px] leading-relaxed font-sans space-y-3">
+                    <p>
+                      <strong className="text-emerald-850 text-emerald-900 font-extrabold">The Inversion Pattern:</strong> Both Stable Trees and Gain zones show net increases in NO₂ concentrations (<strong className="text-slate-900 font-extrabold">+0.263 and +0.422 µg/m³</strong>), whereas Loss zones uniquely experienced a net decrease (<strong className="text-slate-900 font-extrabold">-0.251 µg/m³</strong>). This stands in sharp contrast to your PM15 trends, where concentrations fell uniformly across all zones, indicating highly localized chemical behaviors or differing emission sources for NO₂.
+                    </p>
+                    <p>
+                      <strong className="text-emerald-850 text-emerald-900 font-extrabold">Extreme Uniformity vs. PM10 (Hyper-Concentration):</strong> Nearly the entire analyzed population (<strong className="text-slate-900 font-extrabold">99.94%</strong>) is swept into Class 2, indicating a remarkably uniform distribution profile across Turkey's major population centers. PM10 exposure, by comparison, distributes heterogeneously across all 5 classes.
+                    </p>
+                    <p>
+                      <strong className="text-emerald-850 text-emerald-900 font-extrabold">Spatial Clipping Extent:</strong> The total population accounted for in your NO₂ analysis (<strong className="text-slate-900 font-extrabold">~68.9M</strong>) falls short of the PM10 footprint (<strong className="text-slate-900 font-extrabold">~85.4M</strong>). This implies your NO₂ raster classification data likely has a tighter geographic boundary mask, higher grid-cell masking (e.g., coastal boundary drop-off), or intentionally omits specific regional extents.
+                    </p>
+                  </div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-2 pt-2 border-t border-slate-200/50 leading-relaxed">
+                    Source: WorldPop 100m Population Counts (Unconstrained) 2023 · CAMS Reanalysis NO₂ Concentration Map 2023 · FAO GAUL Level 2 Administrative Boundaries · WHO Target Limit Value: NO₂ = 10 µg/m³
+                  </div>
+                </div>
+
+                {index < 2 && <hr className="border-slate-200 mt-20" />}
+              </div>
+            );
+          }
+
+          if (key === 'pm25') {
+            return (
+              <div key={key} id={`section-${key}`} className="scroll-mt-36 mb-24">
+                
+                {/* PM2.5 Pollutant Heading */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+                  <div>
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-3.5 h-3.5 rounded-full ${item.colorTheme.primary}`}></span>
+                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-950 font-sans">{item.title}</h2>
+                    </div>
+                    <p className="text-slate-500 text-sm mt-1 max-w-2xl font-medium">{item.description}</p>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white px-4 py-2.5 border border-slate-200/80 rounded-xl text-xs font-mono select-none shadow-xs">
+                    <span className="text-slate-550">Correlated Index:</span>
+                    <span className={`font-black ${item.colorTheme.text}`}>{item.associatedLandCover} (Code {item.landCoverCode})</span>
+                  </div>
+                </div>
+
+                {/* ─── CUSTOM 4 LAB TABLES GRID ─── */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 my-8">
+                  
+                  {/* Table 1 — Land Cover Change Statistics for Crops (Lab 3, Step 5) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-slate-850 uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Table className="w-4 h-4 text-emerald-600" />
+                          Table 1 — Land Cover Change Statistics for Crops (Lab 3, Step 5)
+                        </h4>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono font-bold px-2.5 py-0.5 rounded border border-emerald-100">Lab 3</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table id="table-pm25-lcc" className="min-w-full text-slate-700 text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
+                              <th className="py-2.5 px-3 font-bold">Category</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Pixels</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Stability Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                                Stable (Crops ➜ Crops)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">7,906,220,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-800 font-bold">734,500.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-600 font-black">93.80%</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/10 hover:bg-emerald-50/20 text-emerald-950">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                                Gain (other ➜ Crops)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">320,229,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-emerald-850 font-bold">29,750.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/10 hover:bg-rose-50/20 text-rose-950">
+                              <td className="py-3 px-3 font-bold flex items-center gap-1">
+                                <ArrowDownRight className="w-3.5 h-3.5 text-rose-600" />
+                                Loss (Crops ➜ other)
+                              </td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-600">202,254,000</td>
+                              <td className="py-3 px-3 text-right font-mono text-rose-850 font-bold">18,790.0</td>
+                              <td className="py-3 px-3 text-right font-mono text-slate-400">—</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Source: ESRI 10m Land Cover Database (2021 & 2023)</span>
+                      <span>Total Pixel Count: 8,428,703,000</span>
+                    </div>
+                  </div>
+
+                  {/* Table 2 — Top Gain/Loss Transitions for Crops (Lab 3, Step 5) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-slate-850 uppercase tracking-wider font-mono flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-emerald-600" />
+                          Table 2 — Top Gain/Loss Transitions for Farms & Crops (Lab 3, Step 5)
+                        </h4>
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 font-mono font-bold px-2.5 py-0.5 rounded border border-emerald-100">Lab 3</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table id="table-pm25-transitions" className="min-w-full text-slate-700 text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-200 text-slate-455 text-slate-450 text-[10px] font-mono text-left uppercase">
+                              <th className="py-2.5 px-3 font-bold">Direction</th>
+                              <th className="py-2.5 px-3 font-bold">Transition</th>
+                              <th className="py-2.5 px-3 font-bold text-right">% of Total</th>
+                              <th className="py-2.5 px-3 font-bold text-right">Area (km²)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {/* GAINS */}
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-50/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 font-bold text-slate-700">Grassland ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700 font-black">52.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">15,470.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 text-slate-600">Shrubland ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">30.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">8,925.0</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-emerald-50/5 hover:bg-emerald-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded border border-emerald-200">Gain</span></td>
+                              <td className="py-2 px-3 text-slate-650">Bare Area ➜ Crops</td>
+                              <td className="py-2 px-3 text-right font-mono text-emerald-700">18.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">5,355.0</td>
+                            </tr>
+                            {/* LOSSES */}
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-50/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 font-bold text-slate-700">Crops ➜ Built Area</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700 font-black">62.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-bold">11,649.8</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 text-slate-650">Crops ➜ Shrubland</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">23.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800 font-medium">4,321.7</td>
+                            </tr>
+                            <tr className="border-b border-slate-100 bg-rose-50/5 hover:bg-rose-55/15">
+                              <td className="py-2 px-3"><span className="text-[9px] font-mono font-extrabold uppercase bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded border border-rose-200">Loss</span></td>
+                              <td className="py-2 px-3 text-slate-650">Crops ➜ Forest/Trees</td>
+                              <td className="py-2 px-3 text-right font-mono text-rose-700">15.00%</td>
+                              <td className="py-2 px-3 text-right font-mono text-slate-800">2,818.5</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Primary agricultural development and sprawl retraction drivers</span>
+                      <span className="font-bold text-slate-500">MAPPING TRANSITIONS</span>
+                    </div>
+                  </div>
+
+                  {/* Table 3 — PM2.5 Zonal Statistics by Land Cover Zone (Lab 3, Step 6) */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-1 xl:col-span-2 font-sans font-sans">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-xs font-black text-slate-850 uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Table className="w-4 h-4 text-amber-600" />
+                          Table 3 — PM₂.₅ Zonal Statistics by Land Cover Zone (2021–2023)
+                        </h4>
+                        <span className="text-[10px] bg-amber-50 text-amber-700 font-mono font-bold px-2.5 py-0.5 rounded border border-amber-100">Lab 3</span>
+                      </div>
+                      <p className="text-slate-400 text-[10px] uppercase font-mono tracking-wider mb-4">
+                        Note: Values represent AMAC change from 2021 to 2023 (AMAC = 2023 minus 2021 change)
+                      </p>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div className="overflow-x-auto">
+                          <table id="table-pm25-zonal" className="min-w-full text-slate-700 text-xs border-collapse">
+                            <thead>
+                              <tr className="border-b border-slate-200 text-slate-450 text-[10px] font-mono text-left uppercase">
+                                <th className="py-2.5 px-3 font-bold">Zone</th>
+                                <th className="py-2.5 px-3 font-bold">Description</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Mean (µg/m³)</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Min (µg/m³)</th>
+                                <th className="py-2.5 px-3 font-bold text-right">Max (µg/m³)</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 1</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Stable Trees</td>
+                                <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−1.052</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−15.979</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+4.182</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50 flex-row">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 2</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Gain Areas</td>
+                                <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−1.854</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−7.292</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+3.725</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3 px-3 font-mono font-black text-slate-800">Zone 3</td>
+                                <td className="py-3 px-3 font-bold text-slate-700">Loss Areas</td>
+                                <td className="py-3 px-3 text-right font-mono text-emerald-700 font-black">−0.881</td>
+                                <td className="py-3 px-3 text-right font-mono text-blue-600 font-bold">−15.979</td>
+                                <td className="py-3 px-3 text-right font-mono text-red-655 text-red-600 font-bold">+4.026</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Beautiful segmented horizontal progress charts for zonal stats */}
+                        <div className="bg-slate-50/45 p-6 border border-slate-200/65 rounded-2xl flex flex-col gap-6">
+                          <div>
+                            <h4 className="text-[13px] font-extrabold text-[#78350F] tracking-tight flex items-center gap-1.5 font-sans font-sans">
+                              PM₂.₅ Concentration Change by Land Cover Zone
+                            </h4>
+                            <p className="text-[11px] text-slate-500 mt-1 leading-snug font-medium">
+                              Annual Mean Aggregation Change 2021–2023 · negative = improvement (reduction in PM₂.₅)
+                            </p>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="flex flex-wrap gap-4 text-[10px] font-bold text-slate-650 text-slate-600 tracking-wide font-mono select-none">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#D97706]" />
+                              <span>Zone 1 Stable Trees</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#10B981]" />
+                              <span>Zone 2 Gain Areas</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-3 h-3 rounded-full bg-[#F59E0B]" />
+                              <span>Zone 3 Loss Areas</span>
+                            </div>
+                          </div>
+
+                          {/* 1. MEAN PM2.5 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Mean PM₂.₅ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  {/* Center line for Zero */}
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#D97706] rounded-l-xs"
+                                    style={{ width: `${(1.052 / 3.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#D97706]">-1.052</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#10B981] rounded-l-xs"
+                                    style={{ width: `${(1.854 / 3.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#10B981]">-1.854</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div className="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-[#bbb] z-10" />
+                                  <div 
+                                    className="absolute top-0 bottom-0 right-1/2 bg-[#F59E0B] rounded-l-xs"
+                                    style={{ width: `${(0.881 / 3.0) * 50}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-bold text-[#F59E0B]">-0.881</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2. MIN PM2.5 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Min PM₂.₅ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#D97706]/85 rounded-r-xs"
+                                    style={{ width: `${(15.979 / 18.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-15.979</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#10B981]/85 rounded-r-xs"
+                                    style={{ width: `${(7.292 / 18.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-7.292</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#F59E0B]/85 rounded-r-xs"
+                                    style={{ width: `${(15.979 / 18.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">-15.979</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 3. MAX PM2.5 CHANGE */}
+                          <div className="flex flex-col gap-2">
+                            <h5 className="text-[10px] uppercase font-black tracking-wider text-slate-500 font-mono">
+                              Max PM₂.₅ Change (µg/m³)
+                            </h5>
+                            <div className="space-y-2.5 mt-1">
+                              {/* Stable */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Stable</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#D97706]/70 rounded-r-xs"
+                                    style={{ width: `${(4.182 / 5.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+4.182</span>
+                              </div>
+                              {/* Gain */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Gain</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#10B981]/70 rounded-r-xs"
+                                    style={{ width: `${(3.725 / 5.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+3.725</span>
+                              </div>
+                              {/* Loss */}
+                              <div className="flex items-center gap-3">
+                                <span className="w-12 text-[11px] font-bold text-slate-500 font-mono">Loss</span>
+                                <div className="relative flex-1 h-6 bg-slate-100/75 rounded-md overflow-hidden">
+                                  <div 
+                                    className="absolute top-0 bottom-0 left-0 bg-[#F59E0B]/70 rounded-r-xs"
+                                    style={{ width: `${(4.026 / 5.0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="w-14 text-right font-mono text-[11px] font-semibold text-slate-700">+4.026</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Image-Style Note */}
+                          <p className="text-[10px] text-slate-450 leading-relaxed pt-3 border-t border-slate-200/55 font-sans">
+                            <span className="font-bold">Note:</span> All values in µg/m³ · Negative values indicate PM₂.₅ reduction (improvement) between 2021 and 2023 · Positive values indicate increase (worsening) · Source: CAMS Reanalysis PM₂.₅ Annual Mean Aggregation Change · Land cover zones derived from ESRI 10m Annual Land Cover
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*LCC = Land Cover Change, AMAC is Average Annual Concentration difference</span>
+                      <span className="font-bold text-slate-500 font-bold text-slate-500">ZONAL STATISTICS</span>
+                    </div>
+                  </div>
+
+                  {/* Table 4 — Population Exposure by PM2.5 Class */}
+                  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-1 xl:col-span-2">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xs font-black text-[#78350F] uppercase tracking-wider font-mono flex items-center gap-2">
+                          <Users className="w-4 h-4 text-[#D97706]" />
+                          Table 4 — Population Exposure by PM₂.₅ Classification
+                        </h4>
+                        <span className="text-[10px] bg-amber-50 text-amber-700 font-mono font-bold px-2.5 py-0.5 rounded border border-amber-100">Lab 4</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <div className="overflow-x-auto lg:col-span-8">
+                          <table id="table-pm25-exposure" className="min-w-full text-slate-700 text-xs border-collapse">
+                            <thead>
+                              <tr className="bg-[#78350F] text-white text-[10px] font-mono uppercase tracking-wider">
+                                <th className="py-3 px-4 font-bold text-left rounded-l-lg">PM₂.₅ CLASS</th>
+                                <th className="py-3 px-4 font-bold text-right">POPULATION</th>
+                                <th className="py-3 px-4 font-bold text-center">SHARE (%)</th>
+                                <th className="py-3 px-4 font-bold text-center rounded-r-lg font-sans">EXPOSURE PROFILE</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 1 (Lowest Exposure)</td>
+                                <td className="py-3.5 px-4 text-right font-mono text-slate-600">2,860</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#E6F4EA] text-[#137333] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">0.003%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Pristine, unpopulated high-altitude/remote zones</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 2</td>
+                                <td className="py-3.5 px-4 text-center font-mono text-slate-600">2,390,748</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#EBF5FB] text-[#2980B9] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">2.85%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Low-density rural or protected regions</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 3</td>
+                                <td className="py-3.5 px-4 text-center font-mono text-slate-600">63,658,511</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#FEF9E7] text-[#D4AC0D] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">75.84%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Primary baseline: Major urban centers and plains</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 4</td>
+                                <td className="py-3.5 px-4 text-center font-mono text-slate-600">15,401,816</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#FDEDEC] text-[#C0392B] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">18.35%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">High-density urban and industrial corridors</td>
+                              </tr>
+                              <tr className="border-b border-slate-100 hover:bg-slate-50/50 select-text">
+                                <td className="py-3.5 px-4 font-extrabold text-slate-900">Class 5 (Highest Exposure)</td>
+                                <td className="py-3.5 px-4 text-center font-mono text-slate-600">3,982,586</td>
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className="inline-block bg-[#F5EEF8] text-[#8E44AD] font-black text-[11px] px-3.5 py-1 rounded-full font-mono font-extrabold">4.75%</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-center font-bold text-slate-500 font-sans">Severe particulate hot spots / valley cities</td>
+                              </tr>
+                              <tr className="border-t-2 border-slate-350 font-extrabold bg-slate-50/65">
+                                <td className="py-4 px-4 uppercase tracking-wider text-slate-900 rounded-bl-lg">Total Captured</td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-900">85,436,521</td>
+                                <td className="py-4 px-4 text-center">
+                                  <span className="inline-block bg-slate-200 text-slate-700 font-extrabold text-[11px] px-3.5 py-1 rounded-full font-mono">100%</span>
+                                </td>
+                                <td className="py-4 px-4 text-center font-mono text-slate-400 rounded-br-lg">—</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Beautiful synchronized pie chart for demographics */}
+                        <div className="lg:col-span-4 h-56 relative flex items-center justify-center">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { category: 'Class 1', value: 0.003, color: '#10B981' },
+                                  { category: 'Class 2', value: 2.85, color: '#3182CE' },
+                                  { category: 'Class 3', value: 75.84, color: '#DD6B20' },
+                                  { category: 'Class 4', value: 18.35, color: '#E53E3E' },
+                                  { category: 'Class 5', value: 4.75, color: '#805AD5' }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={55}
+                                outerRadius={75}
+                                paddingAngle={3}
+                                dataKey="value"
+                                nameKey="category"
+                              >
+                                {[
+                                  '#10B981',
+                                  '#3182CE',
+                                  '#DD6B20',
+                                  '#E53E3E',
+                                  '#805AD5'
+                                ].map((color, idx) => (
+                                  <Cell key={`cell-${idx}`} fill={color} />
+                                ))}
+                              </Pie>
+                              <ChartTooltip
+                                contentStyle={{ background: '#0F172A', color: 'white', borderRadius: '8px', border: 'none', fontSize: '11px' }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+                            <span className="text-xl font-black text-slate-900 font-mono">Total</span>
+                            <span className="text-[8px] text-slate-500 font-extrabold uppercase tracking-widest leading-none">85.4M People</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                      <span>*Derived from WorldPop 2023 grid datasets layered with PM₂.₅ quantiles</span>
+                      <span>ENV JUSTICE MATRIX</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Key Findings — Turkey PM2.5 Exposure 2023 */}
+                <div id={`findings-${key}`} className="mt-8 p-6 bg-[#FEF3C7]/20 border border-amber-200/60 rounded-2xl border-l-4 border-l-amber-500 shadow-xs text-slate-800 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔍</span>
+                    <h4 className="font-extrabold text-amber-800 text-sm font-sans tracking-wide">
+                      Key Findings — Turkey PM₂.₅ Exposure 2023
+                    </h4>
+                  </div>
+                  <div className="text-slate-650 text-slate-600 text-[13px] leading-relaxed font-sans space-y-3">
+                    <p>
+                      <strong className="text-amber-955 font-extrabold text-amber-900">Vegetation as a Sink:</strong> Unlike NO₂, PM₂.₅ concentrations decreased across all three zones. Crucially, Gain Areas (Zone 2) experienced the most pronounced drop (<strong className="text-slate-950 font-extrabold font-black">−1.854 µg/m³</strong>). This strongly validates the ecological hypothesis that expanding canopy covers act as efficient physical sinks, intercepting and capturing fine particulate matter more effectively than stable or degrading zones.
+                    </p>
+                    <p>
+                      <strong className="text-amber-955 font-extrabold text-amber-900">The Bell-Curve Distribution:</strong> PM₂.₅ exposure displays a healthy, roughly normal distribution curve centered squarely on Class 3 (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">75.84%</strong>), with a heavy skew toward higher exposure (Class 4 & 5 combining for over <strong className="text-slate-955 font-extrabold text-slate-900 font-black">23%</strong>). This is wildly different from NO₂, which was critically trapped at 99.94% in just a single class.
+                    </p>
+                    <p>
+                      <strong className="text-amber-955 font-extrabold text-amber-900">Full Extent Capture:</strong> The total population footprint here (<strong className="text-slate-955 font-extrabold text-slate-900 font-black">~85.4M</strong>) reflects a complete national dataset, matching Turkey's full census expectations far better than the restricted, clipped NO₂ boundary footprint.
+                    </p>
+                    <div className="text-[10px] text-slate-500 font-mono mt-2 pt-2 border-t border-slate-200/50 leading-relaxed font-normal">
+                      <span className="font-bold text-slate-900">Border Effect Observation:</span> The identical minimum values (<strong className="text-slate-955 font-extrabold text-slate-900">−15.979 µg/m³</strong>) shared by Zone 1 and Zone 3 suggest a massive regional PM₂.₅ reduction localized along a shared geographic border between stable forest boundaries and deforested edge zones.
+                    </div>
+                  </div>
+                  <div className="text-[10px] text-slate-450 font-mono mt-2 pt-3 border-t border-slate-250/50 border-slate-200 leading-relaxed select-text">
+                    Source: WorldPop 100m Population Counts (Unconstrained) 2023 · CAMS Reanalysis PM₂.₅ Map 2023 · FAO GAUL Level 2 Administrative Boundaries · WHO Target Limit Value: PM₂.₅ = 5 µg/m³
+                  </div>
                 </div>
 
                 {index < 2 && <hr className="border-slate-200 mt-20" />}
@@ -542,7 +1703,7 @@ export default function AnalysisView() {
 
                   <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 font-mono">
                     <span>*Calculated utilizing Sentinel-2 Cloud-free composites</span>
-                    <span className="font-bold text-slate-650">{item.benchmark}</span>
+                    <span className="font-bold text-slate-655">{item.benchmark}</span>
                   </div>
                 </div>
 
@@ -663,7 +1824,7 @@ export default function AnalysisView() {
                         <div key={idx} className="flex justify-between items-center text-[10px] font-mono">
                           <div className="flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-                            <span className="text-slate-500 font-bold truncate max-w-[130px]">{entry.category.split(' (')[0]}</span>
+                            <span className="text-slate-550 font-bold truncate max-w-[130px]">{entry.category.split(' (')[0]}</span>
                           </div>
                           <span className="font-bold text-slate-900">{entry.value}%</span>
                         </div>
@@ -674,177 +1835,31 @@ export default function AnalysisView() {
                 </div>
               </div>
 
+              {/* Dynamic Key Findings Conclusion Box for PM2.5 */}
+              {key === 'pm25' && (
+                <div className="mt-8 p-6 bg-amber-50/50 border border-amber-200/60 rounded-2xl border-l-4 border-l-amber-500 shadow-xs text-slate-800 flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔍</span>
+                    <h4 className="font-extrabold text-[#78350F] text-sm font-sans tracking-wide">
+                      Key Findings — Turkey PM₂.₅ Exposure 2023
+                    </h4>
+                  </div>
+                  <p className="text-slate-600 text-[13px] leading-relaxed font-sans">
+                    Fine Particulate Matter (PM₂.₅) remains a challenging atmospheric pressure in Turkey, where <strong className="text-slate-900 font-extrabold">58%</strong> of the country's population experiences <strong className="text-slate-900 font-extrabold">Moderate</strong> ranges (5–10 µg/m³). These aerosol curves correspond strongly with intensive <strong className="text-slate-900 font-extrabold">Croplands</strong> (Code 5) activity, causing persistent seasonal spikes during harvesting periods and field conditioning. Gained agricultural areas showcase moderate increases in annual aggregates, signaling that implementing dust-preventative agricultural measures has a major outcome on adjacent suburban population centers.
+                  </p>
+                  <div className="text-[10px] text-slate-450 font-mono mt-2 pt-2 border-t border-slate-200/50 leading-relaxed">
+                    Source: WorldPop 100m Population Counts (Unconstrained) 2023 · CAMS Reanalysis PM₂.₅ Concentration Map 2023 · FAO GAUL Level 2 Administrative Boundaries · WHO Target Limit Value: PM₂.₅ = 5 µg/m³
+                  </div>
+                </div>
+              )}
+
               {/* Horizontal rule separator expect for last */}
               {index < 2 && <hr className="border-slate-200 mt-20" />}
             </div>
           );
         })}
 
-        {/* ─── BIVARIATE MAP EXPLANATION SECTION ─── */}
-        <hr className="border-slate-205 border-slate-200 mb-16" />
-        <div id="bivariate-map-section" className="scroll-mt-36 mb-20 bg-white border border-slate-200/85 p-8 rounded-3xl shadow-xs">
-          <div className="max-w-3xl mb-8">
-            <span className="text-xs font-mono font-black tracking-widest text-emerald-600 uppercase block">Specialized Spatial Layer</span>
-            <h2 id="bivariate-legend-title" className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-950 mt-1 font-sans uppercase">
-              Bivariate Exposure Matrix Explanation
-            </h2>
-            <p className="text-slate-500 text-sm mt-2 leading-relaxed font-medium">
-              Bivariate mapping represents a critical GIS tool pairing two distinct data variables into a single high-impact dual-axis color map. This allows immediate visual extraction of where intensive atmospheric increases overlap precisely with densely populated Turkish metropolitan centers. Try hovering our test legend grid below.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            
-            {/* Left: 5x5 Grid Graphic */}
-            <div className="lg:col-span-5 flex flex-col items-center">
-              <span className="text-[10px] uppercase font-mono text-slate-400 font-black tracking-widest mb-3 select-none flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-indigo-500" />
-                Population Density Quantiles (Low to High)
-              </span>
-
-              <div className="flex select-none">
-                {/* Vertical Axis Indicator */}
-                <div className="flex flex-col justify-between py-2 text-[9px] font-mono font-bold text-slate-400 mr-2.5 uppercase text-right w-14 select-none">
-                  <span>Q5 (Metro)</span>
-                  <span>Q4 (Urban)</span>
-                  <span>Q3 (Suburban)</span>
-                  <span>Q2 (Townships)</span>
-                  <span>Q1 (Wild)</span>
-                </div>
-
-                {/* 5x5 cells container */}
-                <div className="grid grid-cols-5 border border-slate-200 bg-slate-50 p-1.5 rounded-xl gap-1.5 shadow-xs">
-                  {[5, 4, 3, 2, 1].map((y) =>
-                    [1, 2, 3, 4, 5].map((x) => {
-                      const isActive = bivariateHover?.x === x && bivariateHover?.y === y;
-                      return (
-                        <div
-                          key={`cell-${x}-${y}`}
-                          onMouseEnter={() => setBivariateHover({ x, y })}
-                          onMouseLeave={() => setBivariateHover(null)}
-                          className={`w-10 h-10 transition-all rounded-lg duration-150 shadow-2xs cursor-pointer hover:scale-115 flex items-center justify-center text-[10px] font-mono font-extrabold relative ${isActive ? 'ring-2 ring-slate-950 scale-110 z-10' : ''}`}
-                          style={{ backgroundColor: getBivariateColor(x, y), color: (y >= 4 && x >= 4) ? '#FFFFFF' : '#334155' }}
-                        >
-                          X{x}Y{y}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              {/* Horizontal Axis Indicator */}
-              <div className="flex select-none">
-                <div className="w-16"></div>
-                <div className="flex flex-col items-center mt-3 select-none">
-                  <div className="flex justify-between w-[220px] text-[9px] font-mono font-bold text-slate-450 uppercase select-none">
-                    <span>Q1 (Stable)</span>
-                    <span className="mx-auto text-indigo-500">➜</span>
-                    <span>Q5 (Spikes)</span>
-                  </div>
-                  <span className="text-[10px] uppercase font-mono text-slate-400 font-black tracking-widest mt-1 text-center block">
-                    Pollution Increment Rate
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Dynamic Legend Description Card */}
-            <div className="lg:col-span-7 select-none">
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 h-full flex flex-col justify-between min-h-[220px]">
-                <div>
-                  <div className="flex items-center gap-1.5 text-slate-450 text-[10px] font-mono font-extrabold uppercase mb-4">
-                    <Info className="w-4 h-4 text-slate-400" />
-                    Bivariate Dual-Axis Interpreter Matrix
-                  </div>
-                  
-                  {bivariateHover ? (
-                    <div>
-                      <div className="flex justify-between items-start mb-6">
-                        <div>
-                          <span className={`text-[10px] font-mono font-extrabold px-3 py-1 rounded-full uppercase tracking-wider ${getBivariateDescription(bivariateHover.x, bivariateHover.y).textTheme}`}>
-                            {getBivariateDescription(bivariateHover.x, bivariateHover.y).priority}
-                          </span>
-                          <h4 className="text-lg font-extrabold mt-3 text-slate-950 font-sans uppercase">
-                            Legend Segment X{bivariateHover.x} × Y{bivariateHover.y}
-                          </h4>
-                        </div>
-                        <div
-                          className="w-11 h-11 rounded-lg shadow-xs border border-slate-300"
-                          style={{ backgroundColor: getBivariateColor(bivariateHover.x, bivariateHover.y) }}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                        <div className="p-3 bg-white border border-slate-100 rounded-xl shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block uppercase font-bold">Demographic Density</span>
-                          <span className="font-extrabold text-indigo-700 block mt-1">{getBivariateDescription(bivariateHover.x, bivariateHover.y).popLabel}</span>
-                        </div>
-                        <div className="p-3 bg-white border border-slate-100 rounded-xl shadow-2xs">
-                          <span className="text-[10px] text-slate-400 block uppercase font-bold">Aerosol Curve</span>
-                          <span className="font-extrabold text-emerald-700 block mt-1">{getBivariateDescription(bivariateHover.x, bivariateHover.y).pollLabel}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-8 text-center flex flex-col items-center justify-center text-slate-500">
-                      <HelpCircle className="w-10 h-10 text-slate-300 mb-2.5 animate-pulse" />
-                      <p className="font-bold text-slate-800 text-sm">Hover over cells within the matrix grid to test details</p>
-                      <p className="text-slate-400 text-xs mt-1 leading-relaxed">Each grid coordinate identifies a specific air-quality risk-category mapped dynamically across the terrain of Turkey.</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-8 pt-4 border-t border-slate-200 text-[10px] text-slate-400 flex items-center justify-between select-none font-mono">
-                  <span>*Bivariate representation is active for all three pollutants</span>
-                  <span className="font-bold text-indigo-600 uppercase">Turkey 5x5 Aggregations</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* ─── BOTTOM CONCLUSION / SUMMARY BOX ─── */}
-        <div id="conclusion-summary-box" className="p-8 pb-10 bg-gradient-to-tr from-slate-950 to-slate-900 rounded-3xl text-white shadow-xl relative overflow-hidden select-none border border-slate-850">
-          <div className="absolute top-0 right-0 p-8 text-slate-850 opacity-10 pointer-events-none">
-            <Layers className="w-56 h-56" />
-          </div>
-
-          <div className="relative z-10 max-w-4xl">
-            <span className="text-xs px-3 py-1 rounded bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 font-mono font-bold uppercase tracking-widest">
-              Quantitative Synthesis Report
-            </span>
-            <h3 className="text-2xl font-extrabold tracking-tight mt-3 text-white font-sans uppercase">
-              Synthesizing Spatial LCC-Pollution Correlations
-            </h3>
-            
-            <p className="text-slate-300 mt-6 leading-relaxed select-none text-sm font-medium">
-              The multitemporal GIS correlation analysis between 2021 and 2023 across Turkey confirms the profound impact that localized land cover modifications yield on microclimate concentrations:
-            </p>
-
-            <ul className="space-y-4 mt-6 text-slate-300 text-xs list-none pl-0 font-sans">
-              <li className="flex gap-3">
-                <span className="text-emerald-400 font-bold font-mono text-sm leading-none">01.</span>
-                <span>
-                  <strong>Urban Canopy Buffer Needs:</strong> Stable forest buffers in the Marmara and Black Sea regions proved to mitigate annual particulates by a staggering 14% on average, reinforcing that localized afforestation efforts around sprawling Built infrastructure (Code 7) must remain a central regional development policy.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-400 font-bold font-mono text-sm leading-none">02.</span>
-                <span>
-                  <strong>Crop-Aerosol Correlation:</strong> Crop regions (Code 5) coincide heavily with fine particulate (PM₂.₅) surges. The maximum peaks occurred consistently following harvest intervals, advocating for modern mechanical agricultural methodologies that decrease airborne dust and regional fertilizer volatilization.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-400 font-bold font-mono text-sm leading-none">03.</span>
-                <span>
-                  <strong>Planning via Bivariate Layers:</strong> Utilizing Bivariate map models identifies that the overlap of severe Nitrogen Dioxide spikes with high-density population nodes is concentrated within metropolitan districts, giving urban planners immediate visual reference grids of air quality risk priorities.
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
 
       </div>
     </div>

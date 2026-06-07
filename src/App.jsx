@@ -80,7 +80,7 @@ export default function App() {
           <div className="hidden lg:flex items-center gap-4">
             <a
               id="github-nav-link"
-              href="https://github.com/shahzaib1638/mapping-air-quality-turkey" 
+              href="https://github.com/ShahzaibKhalidx/gis-lab-group-15" 
               target="_blank"
               rel="noreferrer"
               className="px-4 py-2 border border-slate-800 bg-slate-900 hover:bg-slate-850 hover:border-slate-700 rounded-xl text-[10px] font-mono font-extrabold uppercase tracking-widest text-slate-200 flex items-center gap-2 group transition-all"
@@ -138,7 +138,7 @@ export default function App() {
               })}
               <hr className="border-slate-900" />
               <a
-                href="https://github.com/shahzaib1638/mapping-air-quality-turkey"
+                href="https://github.com/ShahzaibKhalidx/gis-lab-group-15"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center justify-between gap-3 p-3.5 rounded-xl font-mono text-[10px] font-black uppercase tracking-widest text-slate-300 bg-slate-900/60 border border-slate-800/80"

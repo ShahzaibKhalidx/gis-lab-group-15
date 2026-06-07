@@ -3,7 +3,7 @@ export const methodologyData = {
     title: 'Nitrogen Dioxide (NO₂)',
     shortDesc: 'Combustion and traffic-related air pollutant analyzed in relation to urban expansion.',
     description: 'Nitrogen Dioxide (NO₂) is primarily associated with vehicle emissions, fossil fuel combustion, and industrial activities. Urban zones experience heightened exposure, making Built Area transitions critical indicators of NO₂ patterns over time.',
-    associatedLandCover: 'Built Area (Urban Expansion)',
+    associatedLandCover: 'Built Area',
     landCoverCode: 7,
     benchmark: 'WHO annual mean limit: 10 µg/m³',
     stats: [
