@@ -9,14 +9,15 @@ import { createStringXY } from 'ol/coordinate';
 import { ChevronLeft, ChevronRight, Layers, Sliders, MapPin, Eye, EyeOff, Check, RotateCcw } from 'lucide-react';
 
 const WMS_URL = 'https://www.gis-geoserver.polimi.it/geoserver/gisgeoserver_15/wms';
+// https://www.gis-geoserver.polimi.it/geoserver/gisgeoserver_15/wms?service=WMS&version=1.1.0&request=GetMap&layers=gisgeoserver_15%3ATurkey_LCC_2021_2023&bbox=25.66322%2C35.82216%2C44.80706%2C42.09886&width=768&height=330&srs=EPSG%3A4326&styles=&format=application/openlayers
 
 const LAYER_NAMES = {
   no2: {
     concentration:   'gisgeoserver_15:Turkey_no2_concentration_map_2023',
     amac:            'gisgeoserver_15:Turkey_no2_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
     bivariate:       'gisgeoserver_15:Turkey_no2_pol_2023_bivariate',
-    population:      'gisgeoserver_15:YOUR_NO2_POPULATION_LAYER',
+    population:      'gisgeoserver_15:turkey_no2_2023_chart',
     zonalStatistics: 'gisgeoserver_15:Turkey_no2_zonal_statistics',
     average2023:     'gisgeoserver_15:Turkey_average_no2_2023',
     cams2023:        'gisgeoserver_15:Turkey_CAMS_no2_2023_12',
@@ -24,7 +25,7 @@ const LAYER_NAMES = {
   pm25: {
     concentration:   'gisgeoserver_15:Turkey_pm2p5_concentration_map_2023',
     amac:            'gisgeoserver_15:Turkey_pm2p5_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
     bivariate:       'gisgeoserver_15:Turkey_pm2p5_2023_bivariate.gpkg',
     population:      'gisgeoserver_15:Turkey_pm2p5_2023_chart.gpkg',
     zonalStatistics: 'gisgeoserver_15:Turkey_pm2p5_zonal_statistics_2021_2023',
@@ -34,7 +35,7 @@ const LAYER_NAMES = {
   pm10: {
     concentration:   'gisgeoserver_15:TURKEY_pm10_concentration_map_2023',
     amac:            'gisgeoserver_15:TURKEY_pm10_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:TURKEY_LCC_2021_2023',
+    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
     bivariate:       'gisgeoserver_15:Turkey_pm10_2023_bivariate',
     population:      'gisgeoserver_15:Turkey_pm10_2023_chart',
     zonalStatistics: 'gisgeoserver_15:Turkey_pm10_zonal_statistics',
