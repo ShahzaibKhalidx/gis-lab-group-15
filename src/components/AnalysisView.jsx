@@ -40,6 +40,38 @@ export default function AnalysisView() {
             Politecnico di Milano (A.A. 2025/26), under
             the supervision of Prof. Qiongjie Xu.
           </p>
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-3">
+                What is analysed?
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                This project compares land-cover changes, air-pollution changes, and
+                population exposure across Turkey between 2021 and 2023.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-3">
+                Key terms
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Stable means the selected land-cover class remained unchanged. Gain means
+                other classes changed into it, while loss means it changed into another
+                class.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 className="text-sm font-black text-emerald-600 uppercase tracking-widest mb-3">
+                Reading the results
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Positive AMAC values indicate an increase in pollutant concentration from 2021 to 2023, 
+                while negative values indicate a decrease.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Mappings Summary Grid */}

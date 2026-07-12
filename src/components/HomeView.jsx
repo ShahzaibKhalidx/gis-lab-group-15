@@ -44,16 +44,23 @@ export default function HomeView({ onNavigate }) {
             <span className="text-emerald-400 bg-clip-text">Turkey 2021–2023</span>
           </motion.h1>
 
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-white mt-6 text-base md:text-lg max-w-2xl leading-relaxed font-sans font-medium"
+            className="mt-6 max-w-3xl mx-auto text-center"
           >
-            A geospatial analysis of (NO₂, PM₁₀, and PM₂.₅)
-            concentrations combined with land cover change
-            detection, CAMS and WorldPop data.
-          </motion.p>
+            <p className="text-white text-base md:text-lg leading-relaxed font-sans font-medium">
+              This project shows where land cover changed in Turkey between 2021 and
+              2023, how air pollution changed in the same areas, and how many people
+              were exposed to different pollution levels.
+            </p>
+
+            <p className="text-slate-300 text-sm md:text-base leading-relaxed font-sans mt-3">
+              Data sources: CAMS air-quality data, Esri land-cover data, and WorldPop
+              population data.
+            </p>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}

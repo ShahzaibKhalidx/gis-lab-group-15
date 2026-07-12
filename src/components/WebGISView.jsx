@@ -7,40 +7,41 @@ import { transformExtent } from 'ol/proj';
 import { ScaleLine, FullScreen, MousePosition } from 'ol/control';
 import { createStringXY } from 'ol/coordinate';
 import { ChevronLeft, ChevronRight, Layers, Sliders, MapPin, Eye, EyeOff, Check, RotateCcw } from 'lucide-react';
+import bivariateLegend from '../assets/images/legend_bivariate_5x5.png';
 
 const WMS_URL = 'https://www.gis-geoserver.polimi.it/geoserver/gisgeoserver_15/wms';
 // https://www.gis-geoserver.polimi.it/geoserver/gisgeoserver_15/wms?service=WMS&version=1.1.0&request=GetMap&layers=gisgeoserver_15%3ATurkey_LCC_2021_2023&bbox=25.66322%2C35.82216%2C44.80706%2C42.09886&width=768&height=330&srs=EPSG%3A4326&styles=&format=application/openlayers
 
 const LAYER_NAMES = {
   no2: {
-    concentration:   'gisgeoserver_15:Turkey_no2_concentration_map_2023',
-    amac:            'gisgeoserver_15:Turkey_no2_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
-    bivariate:       'gisgeoserver_15:Turkey_no2_pol_2023_bivariate',
-    population:      'gisgeoserver_15:turkey_no2_2023_chart',
+    concentration: 'gisgeoserver_15:Turkey_no2_concentration_map_2023',
+    amac: 'gisgeoserver_15:Turkey_no2_2021_2023_AMAC_map',
+    landCover: 'gisgeoserver_15:Turkey_LCC_2021_2023',
+    bivariate: 'gisgeoserver_15:Turkey_no2_pol_2023_bivariate',
+    population: 'gisgeoserver_15:turkey_no2_2023_chart',
     zonalStatistics: 'gisgeoserver_15:Turkey_no2_zonal_statistics',
-    average2023:     'gisgeoserver_15:Turkey_average_no2_2023',
-    cams2023:        'gisgeoserver_15:Turkey_CAMS_no2_2023_12',
+    average2023: 'gisgeoserver_15:Turkey_average_no2_2023',
+    cams2023: 'gisgeoserver_15:Turkey_CAMS_no2_2023_12',
   },
   pm25: {
-    concentration:   'gisgeoserver_15:Turkey_pm2p5_concentration_map_2023',
-    amac:            'gisgeoserver_15:Turkey_pm2p5_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
-    bivariate:       'gisgeoserver_15:Turkey_pm2p5_2023_bivariate.gpkg',
-    population:      'gisgeoserver_15:Turkey_pm2p5_2023_chart.gpkg',
+    concentration: 'gisgeoserver_15:Turkey_pm2p5_concentration_map_2023',
+    amac: 'gisgeoserver_15:Turkey_pm2p5_2021_2023_AMAC_map',
+    landCover: 'gisgeoserver_15:Turkey_LCC_2021_2023',
+    bivariate: 'gisgeoserver_15:Turkey_pm2p5_2023_bivariate.gpkg',
+    population: 'gisgeoserver_15:Turkey_pm2p5_2023_chart.gpkg',
     zonalStatistics: 'gisgeoserver_15:Turkey_pm2p5_zonal_statistics_2021_2023',
-    average2023:     'gisgeoserver_15:Turkey_average_pm2p5_2023',
-    cams2023:        'gisgeoserver_15:Turkey_CAMS_pm2p5_2023_12',
+    average2023: 'gisgeoserver_15:Turkey_average_pm2p5_2023',
+    cams2023: 'gisgeoserver_15:Turkey_CAMS_pm2p5_2023_12',
   },
   pm10: {
-    concentration:   'gisgeoserver_15:TURKEY_pm10_concentration_map_2023',
-    amac:            'gisgeoserver_15:TURKEY_pm10_2021_2023_AMAC_map',
-    landCover:       'gisgeoserver_15:Turkey_LCC_2021_2023',
-    bivariate:       'gisgeoserver_15:Turkey_pm10_2023_bivariate',
-    population:      'gisgeoserver_15:Turkey_pm10_2023_chart',
+    concentration: 'gisgeoserver_15:TURKEY_pm10_concentration_map_2023',
+    amac: 'gisgeoserver_15:TURKEY_pm10_2021_2023_AMAC_map',
+    landCover: 'gisgeoserver_15:Turkey_LCC_2021_2023',
+    bivariate: 'gisgeoserver_15:Turkey_pm10_2023_bivariate',
+    population: 'gisgeoserver_15:Turkey_pm10_2023_chart',
     zonalStatistics: 'gisgeoserver_15:Turkey_pm10_zonal_statistics',
-    average2023:     'gisgeoserver_15:Turkey_average_pm10_2023',
-    cams2023:        'gisgeoserver_15:TURKEY_CAMS_pm10_2023_12',
+    average2023: 'gisgeoserver_15:Turkey_average_pm10_2023',
+    cams2023: 'gisgeoserver_15:TURKEY_CAMS_pm10_2023_12',
   },
 };
 
@@ -259,13 +260,12 @@ export default function WebGISView() {
 
   return (
     <div className="relative flex h-[calc(100vh-64px)] overflow-hidden w-full select-none bg-slate-50 text-slate-800 font-sans">
-      
+
       {/* ─── CONTROLS/LAYERS SIDEBAR PANEL (LEFT) ─── */}
       <div
         id="layer-panel"
-        className={`bg-white border-r border-slate-205 border-slate-200 transition-all duration-300 z-10 flex flex-col shadow-lg h-full select-none ${
-          panelOpen ? 'w-80' : 'w-0 overflow-hidden border-r-0'
-        }`}
+        className={`bg-white border-r border-slate-205 border-slate-200 transition-all duration-300 z-10 flex flex-col shadow-lg h-full select-none ${panelOpen ? 'w-80' : 'w-0 overflow-hidden border-r-0'
+          }`}
       >
         {panelOpen && (
           <div className="flex flex-col h-full overflow-y-auto">
@@ -297,11 +297,10 @@ export default function WebGISView() {
                     <button
                       key={key}
                       onClick={() => setActivePollutant(key)}
-                      className={`py-2 rounded font-mono text-xs font-bold transition-all cursor-pointer select-none ${
-                        active
+                      className={`py-2 rounded font-mono text-xs font-bold transition-all cursor-pointer select-none ${active
                           ? 'bg-emerald-600 text-white shadow-xs font-black'
                           : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       {info.label}
                     </button>
@@ -325,18 +324,16 @@ export default function WebGISView() {
                   return (
                     <div
                       key={key}
-                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        visible
+                      className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer select-none ${visible
                           ? 'bg-emerald-50/50 border-emerald-500/20 text-emerald-950 font-bold shadow-2xs'
                           : 'bg-white border-slate-150 text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                      }`}
+                        }`}
                       onClick={() => toggleLayer(key)}
                     >
                       <span className="text-xs font-bold leading-tight pr-2">{label}</span>
                       <button
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          visible ? 'text-emerald-700 bg-emerald-500/10' : 'text-slate-400 hover:text-slate-600'
-                        }`}
+                        className={`p-1.5 rounded-lg transition-colors ${visible ? 'text-emerald-700 bg-emerald-500/10' : 'text-slate-400 hover:text-slate-600'
+                          }`}
                       >
                         {visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                       </button>
@@ -382,11 +379,10 @@ export default function WebGISView() {
                   <button
                     key={item.key}
                     onClick={() => setBasemapKey(item.key)}
-                    className={`p-2.5 rounded-lg text-left truncate border flex items-center justify-between transition-all cursor-pointer ${
-                      basemapKey === item.key
+                    className={`p-2.5 rounded-lg text-left truncate border flex items-center justify-between transition-all cursor-pointer ${basemapKey === item.key
                         ? 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-2xs'
                         : 'bg-white border-slate-150 text-slate-500 hover:text-slate-800 hover:border-slate-300'
-                    }`}
+                      }`}
                   >
                     <span className="text-[10px] uppercase tracking-wide">{item.label.split(' ')[0]}</span>
                     {basemapKey === item.key && <Check className="w-3 h-3 text-indigo-600 shrink-0" />}
@@ -456,14 +452,23 @@ export default function WebGISView() {
                     {label}
                   </span>
                   <div className="bg-slate-50 p-2 rounded border border-slate-150 mt-1 flex justify-center select-none min-h-[30px] shadow-2xs">
-                    <img
-                      src={legendUrl}
-                      alt={`${label} GeoServer rule map index`}
-                      onError={(e) => {
-                        e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20"><text y="15" fill="grey" font-family="monospace" font-size="10">GeoServer Legend</text></svg>';
-                      }}
-                      className="max-w-full select-none"
-                    />
+                    {key === 'bivariate' ? (
+                      <img
+                        src={bivariateLegend}
+                        alt="Bivariate legend showing population count and pollutant concentration"
+                        className="w-[220px] max-w-full h-auto select-none"
+                      />
+                    ) : (
+                      <img
+                        src={legendUrl}
+                        alt={`${label} GeoServer rule map index`}
+                        onError={(e) => {
+                          e.target.src =
+                            'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="20"><text y="15" fill="grey" font-family="monospace" font-size="10">GeoServer Legend</text></svg>';
+                        }}
+                        className="max-w-full select-none"
+                      />
+                    )}
                   </div>
                 </div>
               );
